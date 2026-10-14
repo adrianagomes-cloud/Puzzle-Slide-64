@@ -1,0 +1,35 @@
+name: puzzle_slide_64
+description: "Juego de rompecabezas estilo arcade"
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - lib/assets/Fondo.jpg
+    - lib/assets/Nombre.png
+    - lib/assets/estrellita.png
+    - lib/assets/mario.png
+    - lib/assets/planta.png
+    - lib/assets/bloque.png
+    - lib/assets/hongo.png
+    - lib/assets/bowser.png
+    - lib/assets/calamar.png
+
+
