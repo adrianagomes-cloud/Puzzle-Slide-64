@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'game_screen.dart';
 
 class DifficultySelectionScreen extends StatelessWidget {
   const DifficultySelectionScreen({super.key});
@@ -13,64 +14,26 @@ class DifficultySelectionScreen extends StatelessWidget {
             child: Image.asset(
               'lib/assets/Fondo.jpg',
               fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) => Container(
+                color: const Color(0xFF60A5FA),
+              ),
             ),
           ),
 
-          // 2. CAPA DE INTERFAZ PRINCIPAL (MISMA ESTRUCTURA Y ESPACIADOS QUE EL MAIN MENU)
+          // 2. CAPA DE INTERFAZ PRINCIPAL
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               child: Column(
                 children: [
-                  // ESPACIO SUPERIOR PARA BAJAR EL LOGO (IGUAL QUE EN MAIN MENU)
                   const SizedBox(height: 36),
 
-                  // BANNER SUPERIOR CON LOGO 3D
-                  Container(
-                    width: double.infinity,
-                    constraints: const BoxConstraints(maxWidth: 780),
-                    height: 90,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFB45309),
-                      borderRadius: BorderRadius.circular(22),
-                      border: Border.all(color: Colors.black, width: 3.5),
-                    ),
-                    child: Stack(
-                      children: [
-                        Positioned(
-                          top: 0,
-                          left: 0,
-                          right: 0,
-                          bottom: 7,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFFFCA28),
-                              borderRadius: BorderRadius.circular(18),
-                            ),
-                            child: Stack(
-                              alignment: Alignment.center,
-                              children: [
-                                Positioned(left: 10, top: 10, child: _buildCornerDot()),
-                                Positioned(left: 10, bottom: 10, child: _buildCornerDot()),
-                                Positioned(right: 10, top: 10, child: _buildCornerDot()),
-                                Positioned(right: 10, bottom: 10, child: _buildCornerDot()),
-
-                                Image.asset(
-                                  'lib/assets/Nombre.png',
-                                  height: 60,
-                                  fit: BoxFit.contain,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                  // BANNER SUPERIOR CON LOGO PUZZLE SLIDE 64
+                  _buildHeaderLogo(),
 
                   const SizedBox(height: 12),
 
-                  // TÍTULO: SELECCIONA LA DIFICULTAD (MISMA TIPOGRAFÍA Y TAMAÑO)
+                  // TÍTULO: SELECCIONA LA DIFICULTAD
                   const Text(
                     'SELECCIONA LA DIFICULTAD',
                     textAlign: TextAlign.center,
@@ -88,17 +51,16 @@ class DifficultySelectionScreen extends StatelessWidget {
                     ),
                   ),
 
-                  // ESPACIADO PROPORCIONAL EXACTO AL MAIN MENU
                   const Spacer(flex: 2),
 
-                  // BOTONES DE DIFICULTAD (MISMAS MEDIDAS: MAXWIDTH 440, ALTURA 62, SEPARACIÓN 14)
+                  // BOTONES DE DIFICULTAD
                   Center(
                     child: Container(
                       constraints: const BoxConstraints(maxWidth: 440),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          // 1. FÁCIL (HONGO)
+                          // FÁCIL (3x3 - 8 Piezas)
                           _build3DArcadeButton(
                             text: 'FÁCIL',
                             imagePath: 'lib/assets/hongo.png',
@@ -108,12 +70,12 @@ class DifficultySelectionScreen extends StatelessWidget {
                             badgeColor: const Color(0xFF15803D),
                             textColor: Colors.white,
                             onPressed: () {
-                              // Iniciar juego en modo FÁCIL (3x3)
+                              _navigateToGame(context, gridSize: 3, difficultyName: 'FÁCIL');
                             },
                           ),
                           const SizedBox(height: 14),
 
-                          // 2. NORMAL (CALAMAR AMPLIADO)
+                          // NORMAL (4x4 - 15 Piezas)
                           _build3DArcadeButton(
                             text: 'NORMAL',
                             imagePath: 'lib/assets/calamar.png',
@@ -123,12 +85,12 @@ class DifficultySelectionScreen extends StatelessWidget {
                             badgeColor: const Color(0xFFD97706),
                             textColor: const Color(0xFF1E293B),
                             onPressed: () {
-                              // Iniciar juego en modo NORMAL (4x4)
+                              _navigateToGame(context, gridSize: 4, difficultyName: 'NORMAL');
                             },
                           ),
                           const SizedBox(height: 14),
 
-                          // 3. DIFÍCIL (BOWSER)
+                          // DIFÍCIL (5x5 - 24 Piezas)
                           _build3DArcadeButton(
                             text: 'DIFÍCIL',
                             imagePath: 'lib/assets/bowser.png',
@@ -138,7 +100,7 @@ class DifficultySelectionScreen extends StatelessWidget {
                             badgeColor: const Color(0xFFB91C1C),
                             textColor: Colors.white,
                             onPressed: () {
-                              // Iniciar juego en modo DIFÍCIL (5x5)
+                              _navigateToGame(context, gridSize: 5, difficultyName: 'DIFÍCIL');
                             },
                           ),
                         ],
@@ -146,23 +108,20 @@ class DifficultySelectionScreen extends StatelessWidget {
                     ),
                   ),
 
-                  // ESPACIADO INFERIOR PROPORCIONAL EXACTO
                   const Spacer(flex: 3),
                 ],
               ),
             ),
           ),
 
-          // 3. BOTÓN VOLVER ATRÁS (ALINEADO A LA ALTURA DEL LOGO)
+          // 3. BOTÓN VOLVER ATRÁS
           Positioned(
             top: 36,
             left: 20,
             child: SafeArea(
               child: InkWell(
                 borderRadius: BorderRadius.circular(14),
-                onTap: () {
-                  Navigator.pop(context);
-                },
+                onTap: () => Navigator.pop(context),
                 child: Container(
                   width: 52,
                   height: 52,
@@ -192,6 +151,74 @@ class DifficultySelectionScreen extends StatelessWidget {
     );
   }
 
+  void _navigateToGame(BuildContext context, {required int gridSize, required String difficultyName}) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => GameScreen(
+          gridSize: gridSize,
+          difficultyName: difficultyName,
+        ),
+      ),
+    );
+  }
+
+  static Widget _buildHeaderLogo() {
+    return Container(
+      width: double.infinity,
+      constraints: const BoxConstraints(maxWidth: 780),
+      height: 90,
+      decoration: BoxDecoration(
+        color: const Color(0xFFB45309),
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: Colors.black, width: 3.5),
+      ),
+      child: Stack(
+        children: [
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 7,
+            child: Container(
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFCA28),
+                borderRadius: BorderRadius.circular(18),
+              ),
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  Positioned(left: 10, top: 10, child: _buildCornerDot()),
+                  Positioned(left: 10, bottom: 10, child: _buildCornerDot()),
+                  Positioned(right: 10, top: 10, child: _buildCornerDot()),
+                  Positioned(right: 10, bottom: 10, child: _buildCornerDot()),
+
+                  Image.asset(
+                    'lib/assets/Nombre.png',
+                    height: 60,
+                    fit: BoxFit.contain,
+                    errorBuilder: (context, error, stackTrace) => const Text(
+                      'PUZZLE SLIDE 64',
+                      style: TextStyle(
+                        fontSize: 32,
+                        fontWeight: FontWeight.w900,
+                        color: Color(0xFFDC2626),
+                        letterSpacing: 1.5,
+                        shadows: [
+                          Shadow(color: Colors.black, offset: Offset(2, 2), blurRadius: 2),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   static Widget _buildCornerDot() {
     return Container(
       width: 7,
@@ -203,10 +230,8 @@ class DifficultySelectionScreen extends StatelessWidget {
     );
   }
 
-  // WIDGET DE BOTÓN 3D REUTILIZABLE (MISMO TAMAÑO DE 62PX Y BORDES QUE MAIN MENU)
   Widget _build3DArcadeButton({
     required String text,
-    IconData? icon,
     String? imagePath,
     double imageScale = 1.0,
     required Color surfaceColor,
@@ -237,7 +262,6 @@ class DifficultySelectionScreen extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  // CUADRO DEL BADGE
                   Container(
                     width: 42,
                     height: 42,
@@ -252,17 +276,16 @@ class DifficultySelectionScreen extends StatelessWidget {
                             child: Image.asset(
                               imagePath,
                               fit: BoxFit.contain,
+                              errorBuilder: (context, error, stackTrace) => Icon(
+                                Icons.grid_view_rounded,
+                                color: textColor,
+                                size: 24,
+                              ),
                             ),
                           )
-                        : Icon(
-                            icon,
-                            color: textColor,
-                            size: 24,
-                          ),
+                        : Icon(Icons.star, color: textColor, size: 24),
                   ),
                   const SizedBox(width: 14),
-
-                  // TEXTO DEL BOTÓN
                   Text(
                     text,
                     style: TextStyle(
@@ -272,9 +295,7 @@ class DifficultySelectionScreen extends StatelessWidget {
                       letterSpacing: 1.0,
                     ),
                   ),
-
                   const Spacer(),
-
                   Icon(
                     Icons.chevron_right_rounded,
                     color: textColor,
@@ -284,7 +305,6 @@ class DifficultySelectionScreen extends StatelessWidget {
               ),
             ),
           ),
-
           Positioned.fill(
             child: Material(
               color: Colors.transparent,

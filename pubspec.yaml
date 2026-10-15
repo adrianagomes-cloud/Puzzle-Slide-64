@@ -31,5 +31,8 @@ flutter:
     - lib/assets/hongo.png
     - lib/assets/bowser.png
     - lib/assets/calamar.png
-
+    - lib/assets/Facil.png
+    - lib/assets/Medio.png
+    - lib/assets/Dificil.png
+    - lib/assets/ComoJugar.png
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'difficulty_selection_screen.dart';
+import 'how_to_play_screen.dart';
 
 class MainMenuScreen extends StatelessWidget {
   const MainMenuScreen({super.key});
@@ -14,6 +15,9 @@ class MainMenuScreen extends StatelessWidget {
             child: Image.asset(
               'lib/assets/Fondo.jpg',
               fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) => Container(
+                color: const Color(0xFF60A5FA),
+              ),
             ),
           ),
 
@@ -23,55 +27,14 @@ class MainMenuScreen extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               child: Column(
                 children: [
-                  // ESPACIO PARA BAJAR EL LOGO SUPERIOR
                   const SizedBox(height: 36),
 
-                  // BANNER SUPERIOR CON EFECTO 3D
-                  Container(
-                    width: double.infinity,
-                    constraints: const BoxConstraints(maxWidth: 780),
-                    height: 90,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFB45309),
-                      borderRadius: BorderRadius.circular(22),
-                      border: Border.all(color: Colors.black, width: 3.5),
-                    ),
-                    child: Stack(
-                      children: [
-                        Positioned(
-                          top: 0,
-                          left: 0,
-                          right: 0,
-                          bottom: 7,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFFFCA28),
-                              borderRadius: BorderRadius.circular(18),
-                            ),
-                            child: Stack(
-                              alignment: Alignment.center,
-                              children: [
-                                Positioned(left: 10, top: 10, child: _buildCornerDot()),
-                                Positioned(left: 10, bottom: 10, child: _buildCornerDot()),
-                                Positioned(right: 10, top: 10, child: _buildCornerDot()),
-                                Positioned(right: 10, bottom: 10, child: _buildCornerDot()),
-
-                                Image.asset(
-                                  'lib/assets/Nombre.png',
-                                  height: 60,
-                                  fit: BoxFit.contain,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                  // BANNER SUPERIOR CON LOGO PUZZLE SLIDE 64 (EFECTO 3D)
+                  _buildHeaderBanner(),
 
                   const SizedBox(height: 12),
 
-                  // Subtítulo
+                  // SUBTÍTULO
                   const Text(
                     '¡Ordena las fichas y supera el desafío!',
                     textAlign: TextAlign.center,
@@ -99,7 +62,7 @@ class MainMenuScreen extends StatelessWidget {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          // BOTÓN JUGAR (MARIO) -> NAVEGA A SELECCIÓN DE DIFICULTAD
+                          // 1. BOTÓN JUGAR (MARIO) -> NAVEGA A SELECCIÓN DE DIFICULTAD
                           _build3DArcadeButton(
                             text: 'JUGAR',
                             imagePath: 'lib/assets/mario.png',
@@ -118,7 +81,7 @@ class MainMenuScreen extends StatelessWidget {
                           ),
                           const SizedBox(height: 14),
 
-                          // BOTÓN RÉCORDS (ESTRELLITA)
+                          // 2. BOTÓN RÉCORDS (ESTRELLITA)
                           _build3DArcadeButton(
                             text: 'RÉCORDS',
                             imagePath: 'lib/assets/estrellita.png',
@@ -126,11 +89,18 @@ class MainMenuScreen extends StatelessWidget {
                             baseColor: const Color(0xFFB45309),
                             badgeColor: const Color(0xFFD97706),
                             textColor: const Color(0xFF1E293B),
-                            onPressed: () {},
+                            onPressed: () {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Pantalla de Récords en desarrollo...'),
+                                  duration: Duration(seconds: 1),
+                                ),
+                              );
+                            },
                           ),
                           const SizedBox(height: 14),
 
-                          // BOTÓN OPCIONES (PLANTA PIRAÑA)
+                          // 3. BOTÓN OPCIONES (PLANTA PIRAÑA)
                           _build3DArcadeButton(
                             text: 'OPCIONES',
                             imagePath: 'lib/assets/planta.png',
@@ -138,7 +108,14 @@ class MainMenuScreen extends StatelessWidget {
                             baseColor: const Color(0xFF14532D),
                             badgeColor: const Color(0xFF15803D),
                             textColor: Colors.white,
-                            onPressed: () {},
+                            onPressed: () {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Pantalla de Opciones en desarrollo...'),
+                                  duration: Duration(seconds: 1),
+                                ),
+                              );
+                            },
                           ),
                         ],
                       ),
@@ -151,7 +128,7 @@ class MainMenuScreen extends StatelessWidget {
             ),
           ),
 
-          // 3. BOTÓN "CÓMO JUGAR"
+          // 3. BOTÓN "CÓMO JUGAR" (BLOQUE ESQUINA SUPERIOR DERECHA)
           Positioned(
             top: 16,
             right: 25,
@@ -162,7 +139,12 @@ class MainMenuScreen extends StatelessWidget {
                   InkWell(
                     borderRadius: BorderRadius.circular(12),
                     onTap: () {
-                      // Acción para abrir las instrucciones
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const HowToPlayScreen(),
+                        ),
+                      );
                     },
                     child: SizedBox(
                       width: 87,
@@ -170,6 +152,20 @@ class MainMenuScreen extends StatelessWidget {
                       child: Image.asset(
                         'lib/assets/bloque.png',
                         fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) => Container(
+                          width: 60,
+                          height: 60,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFFCA28),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: Colors.black, width: 3),
+                          ),
+                          child: const Icon(
+                            Icons.help_outline_rounded,
+                            size: 36,
+                            color: Colors.black,
+                          ),
+                        ),
                       ),
                     ),
                   ),
@@ -188,6 +184,67 @@ class MainMenuScreen extends StatelessWidget {
                           blurRadius: 3,
                         ),
                       ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // WIDGET BANNER SUPERIOR CON ESTILO 3D
+  Widget _buildHeaderBanner() {
+    return Container(
+      width: double.infinity,
+      constraints: const BoxConstraints(maxWidth: 780),
+      height: 90,
+      decoration: BoxDecoration(
+        color: const Color(0xFFB45309),
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: Colors.black, width: 3.5),
+      ),
+      child: Stack(
+        children: [
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 7,
+            child: Container(
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFCA28),
+                borderRadius: BorderRadius.circular(18),
+              ),
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  Positioned(left: 10, top: 10, child: _buildCornerDot()),
+                  Positioned(left: 10, bottom: 10, child: _buildCornerDot()),
+                  Positioned(right: 10, top: 10, child: _buildCornerDot()),
+                  Positioned(right: 10, bottom: 10, child: _buildCornerDot()),
+
+                  Image.asset(
+                    'lib/assets/Nombre.png',
+                    height: 60,
+                    fit: BoxFit.contain,
+                    errorBuilder: (context, error, stackTrace) => const Text(
+                      'PUZZLE SLIDE 64',
+                      style: TextStyle(
+                        fontSize: 32,
+                        fontWeight: FontWeight.w900,
+                        color: Color(0xFFDC2626),
+                        letterSpacing: 1.5,
+                        shadows: [
+                          Shadow(
+                            color: Colors.black,
+                            offset: Offset(2, 2),
+                            blurRadius: 2,
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ],
@@ -256,6 +313,11 @@ class MainMenuScreen extends StatelessWidget {
                         ? Image.asset(
                             imagePath,
                             fit: BoxFit.contain,
+                            errorBuilder: (context, error, stackTrace) => Icon(
+                              icon ?? Icons.play_arrow_rounded,
+                              color: textColor,
+                              size: 24,
+                            ),
                           )
                         : Icon(
                             icon,
