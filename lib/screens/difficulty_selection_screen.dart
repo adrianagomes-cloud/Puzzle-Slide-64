@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../services/sound_service.dart';
 import 'game_screen.dart';
 
 class DifficultySelectionScreen extends StatelessWidget {
@@ -27,121 +28,130 @@ class DifficultySelectionScreen extends StatelessWidget {
               child: Column(
                 children: [
                   const SizedBox(height: 36),
-
-                  // BANNER SUPERIOR CON LOGO PUZZLE SLIDE 64
-                  _buildHeaderLogo(),
-
+                  _buildHeaderBanner(),
                   const SizedBox(height: 12),
-
-                  // TÍTULO: SELECCIONA LA DIFICULTAD
                   const Text(
-                    'SELECCIONA LA DIFICULTAD',
+                    '¡Selecciona tu nivel de desafío!',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 18,
                       fontWeight: FontWeight.w800,
                       shadows: [
-                        Shadow(
-                          color: Colors.black,
-                          offset: Offset(1, 2),
-                          blurRadius: 3,
-                        ),
+                        Shadow(color: Colors.black, offset: Offset(1, 2), blurRadius: 3),
                       ],
                     ),
                   ),
-
                   const Spacer(flex: 2),
-
-                  // BOTONES DE DIFICULTAD
                   Center(
                     child: Container(
                       constraints: const BoxConstraints(maxWidth: 440),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          // FÁCIL (3x3 - 8 Piezas)
+                          // 1. DIFICULTAD FÁCIL (3x3)
                           _build3DArcadeButton(
-                            text: 'FÁCIL',
+                            text: 'FÁCIL (3x3)',
                             imagePath: 'lib/assets/hongo.png',
-                            imageScale: 1.1,
                             surfaceColor: const Color(0xFF22C55E),
                             baseColor: const Color(0xFF14532D),
                             badgeColor: const Color(0xFF15803D),
                             textColor: Colors.white,
-                            onPressed: () {
-                              _navigateToGame(context, gridSize: 3, difficultyName: 'FÁCIL');
+                            onPressed: () async {
+                              SoundService.stopBgm(); // Detiene BGM para entrar a jugar
+                              await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const GameScreen(
+                                    gridSize: 3,
+                                    difficultyName: 'FÁCIL',
+                                  ),
+                                ),
+                              );
+                              SoundService.startBgm(); // Reanuda BGM al regresar
                             },
                           ),
                           const SizedBox(height: 14),
 
-                          // NORMAL (4x4 - 15 Piezas)
+                          // 2. DIFICULTAD MEDIO (4x4)
                           _build3DArcadeButton(
-                            text: 'NORMAL',
+                            text: 'MEDIO (4x4)',
                             imagePath: 'lib/assets/calamar.png',
-                            imageScale: 1.5,
                             surfaceColor: const Color(0xFFFFCA28),
                             baseColor: const Color(0xFFB45309),
                             badgeColor: const Color(0xFFD97706),
                             textColor: const Color(0xFF1E293B),
-                            onPressed: () {
-                              _navigateToGame(context, gridSize: 4, difficultyName: 'NORMAL');
+                            onPressed: () async {
+                              SoundService.stopBgm(); // Detiene BGM para entrar a jugar
+                              await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const GameScreen(
+                                    gridSize: 4,
+                                    difficultyName: 'MEDIO',
+                                  ),
+                                ),
+                              );
+                              SoundService.startBgm(); // Reanuda BGM al regresar
                             },
                           ),
                           const SizedBox(height: 14),
 
-                          // DIFÍCIL (5x5 - 24 Piezas)
+                          // 3. DIFICULTAD DIFÍCIL (5x5)
                           _build3DArcadeButton(
-                            text: 'DIFÍCIL',
+                            text: 'DIFÍCIL (5x5)',
                             imagePath: 'lib/assets/bowser.png',
-                            imageScale: 0.9,
                             surfaceColor: const Color(0xFFEF4444),
                             baseColor: const Color(0xFF991B1B),
                             badgeColor: const Color(0xFFB91C1C),
                             textColor: Colors.white,
-                            onPressed: () {
-                              _navigateToGame(context, gridSize: 5, difficultyName: 'DIFÍCIL');
+                            onPressed: () async {
+                              SoundService.stopBgm(); // Detiene BGM para entrar a jugar
+                              await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const GameScreen(
+                                    gridSize: 5,
+                                    difficultyName: 'DIFÍCIL',
+                                  ),
+                                ),
+                              );
+                              SoundService.startBgm(); // Reanuda BGM al regresar
                             },
                           ),
                         ],
                       ),
                     ),
                   ),
-
                   const Spacer(flex: 3),
                 ],
               ),
             ),
           ),
 
-          // 3. BOTÓN VOLVER ATRÁS
+          // 3. BOTÓN FLOTANTE ROJO DE ATRÁS -> REPRODUCE KLICK
           Positioned(
-            top: 36,
+            top: 24,
             left: 20,
             child: SafeArea(
               child: InkWell(
                 borderRadius: BorderRadius.circular(14),
-                onTap: () => Navigator.pop(context),
+                onTap: () {
+                  SoundService.playKlickSound();
+                  Navigator.pop(context);
+                },
                 child: Container(
-                  width: 52,
-                  height: 52,
+                  width: 48,
+                  height: 48,
                   decoration: BoxDecoration(
                     color: const Color(0xFFEF4444),
                     borderRadius: BorderRadius.circular(14),
                     border: Border.all(color: Colors.black, width: 3.5),
                     boxShadow: const [
-                      BoxShadow(
-                        color: Colors.black45,
-                        offset: Offset(0, 4),
-                        blurRadius: 3,
-                      ),
+                      BoxShadow(color: Colors.black45, offset: Offset(0, 4), blurRadius: 3),
                     ],
                   ),
-                  child: const Icon(
-                    Icons.arrow_back_rounded,
-                    color: Colors.white,
-                    size: 30,
-                  ),
+                  child: const Icon(Icons.arrow_back_rounded, color: Colors.white, size: 28),
                 ),
               ),
             ),
@@ -151,19 +161,7 @@ class DifficultySelectionScreen extends StatelessWidget {
     );
   }
 
-  void _navigateToGame(BuildContext context, {required int gridSize, required String difficultyName}) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => GameScreen(
-          gridSize: gridSize,
-          difficultyName: difficultyName,
-        ),
-      ),
-    );
-  }
-
-  static Widget _buildHeaderLogo() {
+  Widget _buildHeaderBanner() {
     return Container(
       width: double.infinity,
       constraints: const BoxConstraints(maxWidth: 780),
@@ -176,10 +174,7 @@ class DifficultySelectionScreen extends StatelessWidget {
       child: Stack(
         children: [
           Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 7,
+            top: 0, left: 0, right: 0, bottom: 7,
             child: Container(
               decoration: BoxDecoration(
                 color: const Color(0xFFFFCA28),
@@ -192,7 +187,6 @@ class DifficultySelectionScreen extends StatelessWidget {
                   Positioned(left: 10, bottom: 10, child: _buildCornerDot()),
                   Positioned(right: 10, top: 10, child: _buildCornerDot()),
                   Positioned(right: 10, bottom: 10, child: _buildCornerDot()),
-
                   Image.asset(
                     'lib/assets/Nombre.png',
                     height: 60,
@@ -203,10 +197,6 @@ class DifficultySelectionScreen extends StatelessWidget {
                         fontSize: 32,
                         fontWeight: FontWeight.w900,
                         color: Color(0xFFDC2626),
-                        letterSpacing: 1.5,
-                        shadows: [
-                          Shadow(color: Colors.black, offset: Offset(2, 2), blurRadius: 2),
-                        ],
                       ),
                     ),
                   ),
@@ -232,8 +222,7 @@ class DifficultySelectionScreen extends StatelessWidget {
 
   Widget _build3DArcadeButton({
     required String text,
-    String? imagePath,
-    double imageScale = 1.0,
+    required String imagePath,
     required Color surfaceColor,
     required Color baseColor,
     required Color badgeColor,
@@ -250,10 +239,7 @@ class DifficultySelectionScreen extends StatelessWidget {
       child: Stack(
         children: [
           Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 6,
+            top: 0, left: 0, right: 0, bottom: 6,
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12),
               decoration: BoxDecoration(
@@ -265,25 +251,20 @@ class DifficultySelectionScreen extends StatelessWidget {
                   Container(
                     width: 42,
                     height: 42,
-                    clipBehavior: Clip.antiAlias,
+                    padding: const EdgeInsets.all(3),
                     decoration: BoxDecoration(
                       color: badgeColor,
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: imagePath != null
-                        ? Transform.scale(
-                            scale: imageScale,
-                            child: Image.asset(
-                              imagePath,
-                              fit: BoxFit.contain,
-                              errorBuilder: (context, error, stackTrace) => Icon(
-                                Icons.grid_view_rounded,
-                                color: textColor,
-                                size: 24,
-                              ),
-                            ),
-                          )
-                        : Icon(Icons.star, color: textColor, size: 24),
+                    child: Image.asset(
+                      imagePath,
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) => Icon(
+                        Icons.videogame_asset_rounded,
+                        color: textColor,
+                        size: 24,
+                      ),
+                    ),
                   ),
                   const SizedBox(width: 14),
                   Text(

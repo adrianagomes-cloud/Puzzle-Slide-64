@@ -1,6 +1,6 @@
 name: puzzle_slide_64
-description: "Juego de rompecabezas estilo arcade"
-publish_to: 'none'
+description: "Un juego de rompecabezas deslizante estilo arcade retro."
+publish_to: 'none' # Evita la publicación accidental en pub.dev
 
 version: 1.0.0+1
 
@@ -10,8 +10,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-
   cupertino_icons: ^1.0.8
+  audioplayers: ^6.0.0
 
 dev_dependencies:
   flutter_test:
@@ -21,18 +21,7 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
+  # Declaración de carpetas de recursos (imágenes y sonidos)
   assets:
-    - lib/assets/Fondo.jpg
-    - lib/assets/Nombre.png
-    - lib/assets/estrellita.png
-    - lib/assets/mario.png
-    - lib/assets/planta.png
-    - lib/assets/bloque.png
-    - lib/assets/hongo.png
-    - lib/assets/bowser.png
-    - lib/assets/calamar.png
-    - lib/assets/Facil.png
-    - lib/assets/Medio.png
-    - lib/assets/Dificil.png
-    - lib/assets/ComoJugar.png
-
+    - lib/assets/
+    - lib/assets/songs/

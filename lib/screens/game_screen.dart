@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
+import '../services/sound_service.dart';
 
 class GameScreen extends StatefulWidget {
   final int gridSize;
@@ -24,6 +25,7 @@ class _GameScreenState extends State<GameScreen> {
   bool _isTimerRunning = false;
   bool _isSoundOn = true;
   bool _isGameWon = false;
+  bool _isPaused = false;
 
   @override
   void initState() {
@@ -37,7 +39,6 @@ class _GameScreenState extends State<GameScreen> {
     super.dispose();
   }
 
-  // OBTENER LA IMAGEN DE TÍTULO SEGÚN DIFICULTAD
   String _getDifficultyLogoPath() {
     String diff = widget.difficultyName.toUpperCase();
     if (diff.contains('FÁCIL') || diff.contains('FACIL')) {
@@ -49,14 +50,13 @@ class _GameScreenState extends State<GameScreen> {
     }
   }
 
-  // --- LÓGICA DEL JUEGO Y SOLUBILIDAD ---
-
   void _initNewGame() {
     _timer?.cancel();
     _isTimerRunning = false;
     _secondsPassed = 0;
     _moves = 0;
     _isGameWon = false;
+    _isPaused = false;
 
     int totalTiles = widget.gridSize * widget.gridSize;
     List<int> tiles = List.generate(totalTiles, (index) => (index + 1) % totalTiles);
@@ -103,17 +103,42 @@ class _GameScreenState extends State<GameScreen> {
   }
 
   void _startTimer() {
-    if (_isTimerRunning) return;
+    if (_isTimerRunning || _isPaused) return;
     _isTimerRunning = true;
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      setState(() {
-        _secondsPassed++;
-      });
+      if (!_isPaused) {
+        setState(() {
+          _secondsPassed++;
+        });
+      }
     });
   }
 
-  void _onTileTap(int index) {
+  // --- LÓGICA DE PAUSA (SONIDO SOLO AL PAUSAR) ---
+  void _togglePause() {
     if (_isGameWon) return;
+
+    // Solo reproduce el sonido cuando se pulsa PAUSA (no al REANUDAR)
+    if (!_isPaused) {
+      SoundService.playPauseSound();
+    }
+
+    setState(() {
+      _isPaused = !_isPaused;
+    });
+
+    if (_isPaused) {
+      _timer?.cancel();
+      _isTimerRunning = false;
+    } else {
+      if (_moves > 0) {
+        _startTimer();
+      }
+    }
+  }
+
+  void _onTileTap(int index) {
+    if (_isGameWon || _isPaused) return;
 
     int emptyIndex = _board.indexOf(0);
     int size = widget.gridSize;
@@ -217,8 +242,6 @@ class _GameScreenState extends State<GameScreen> {
     return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
   }
 
-  // --- INTERFAZ GRÁFICA ---
-
   @override
   Widget build(BuildContext context) {
     int totalTiles = (widget.gridSize * widget.gridSize) - 1;
@@ -226,7 +249,6 @@ class _GameScreenState extends State<GameScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          // 1. FONDO
           Positioned.fill(
             child: Image.asset(
               'lib/assets/Fondo.jpg',
@@ -236,14 +258,10 @@ class _GameScreenState extends State<GameScreen> {
               ),
             ),
           ),
-
-          // 2. CONTENIDO PRINCIPAL
           SafeArea(
             child: Column(
               children: [
                 const SizedBox(height: 10),
-
-                // BARRA SUPERIOR (MENÚ | LOGO DIFICULTAD | SONIDO)
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Row(
@@ -251,7 +269,10 @@ class _GameScreenState extends State<GameScreen> {
                       _buildTopPillButton(
                         icon: Icons.arrow_back_rounded,
                         label: 'MENÚ',
-                        onPressed: () => Navigator.pop(context),
+                        onPressed: () {
+                          SoundService.playKlickSound();
+                          Navigator.pop(context);
+                        },
                       ),
                       const SizedBox(width: 8),
                       Expanded(child: _buildHeaderBanner()),
@@ -262,16 +283,14 @@ class _GameScreenState extends State<GameScreen> {
                         onPressed: () {
                           setState(() {
                             _isSoundOn = !_isSoundOn;
+                            SoundService.isSoundOn = _isSoundOn;
                           });
                         },
                       ),
                     ],
                   ),
                 ),
-
                 const SizedBox(height: 8),
-
-                // BADGE DE DIFICULTAD ACTIVA
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                   decoration: BoxDecoration(
@@ -285,14 +304,10 @@ class _GameScreenState extends State<GameScreen> {
                       color: Colors.white,
                       fontSize: 12,
                       fontWeight: FontWeight.w800,
-                      letterSpacing: 0.8,
                     ),
                   ),
                 ),
-
                 const SizedBox(height: 10),
-
-                // CUERPO DEL JUEGO CENTRADO
                 Expanded(
                   child: Center(
                     child: Container(
@@ -331,8 +346,24 @@ class _GameScreenState extends State<GameScreen> {
                                   Row(
                                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                     children: [
-                                      SizedBox(width: 130, child: _build3DActionButton('PAUSA', const Color(0xFFEF4444), Icons.pause_rounded, () {})),
-                                      SizedBox(width: 130, child: _build3DActionButton('REINICIAR', const Color(0xFF22C55E), Icons.refresh_rounded, _initNewGame)),
+                                      SizedBox(
+                                        width: 130,
+                                        child: _build3DActionButton(
+                                          _isPaused ? 'REANUDAR' : 'PAUSA',
+                                          _isPaused ? const Color(0xFF22C55E) : const Color(0xFFEF4444),
+                                          _isPaused ? Icons.play_arrow_rounded : Icons.pause_rounded,
+                                          _togglePause,
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        width: 130,
+                                        child: _build3DActionButton(
+                                          'REINICIAR',
+                                          const Color(0xFF22C55E),
+                                          Icons.refresh_rounded,
+                                          _initNewGame,
+                                        ),
+                                      ),
                                     ],
                                   ),
                                 ],
@@ -344,8 +375,6 @@ class _GameScreenState extends State<GameScreen> {
                     ),
                   ),
                 ),
-
-                // PIE DE PANTALLA CON INSTRUCCIÓN
                 Padding(
                   padding: const EdgeInsets.only(bottom: 8, top: 4),
                   child: Column(
@@ -356,7 +385,6 @@ class _GameScreenState extends State<GameScreen> {
                           color: Colors.white,
                           fontWeight: FontWeight.w900,
                           fontSize: 13,
-                          shadows: [Shadow(color: Colors.black, offset: Offset(1, 1), blurRadius: 2)],
                         ),
                       ),
                       const Text(
@@ -378,7 +406,6 @@ class _GameScreenState extends State<GameScreen> {
     );
   }
 
-  // BANNER CON LA IMAGEN DE LA DIFICULTAD (FACIL, MEDIO, DIFICIL)
   Widget _buildHeaderBanner() {
     return Container(
       height: 52,
@@ -407,17 +434,12 @@ class _GameScreenState extends State<GameScreen> {
                     _getDifficultyLogoPath(),
                     height: 38,
                     fit: BoxFit.contain,
-                    errorBuilder: (context, error, stackTrace) => Image.asset(
-                      'lib/assets/Nombre.png',
-                      height: 38,
-                      fit: BoxFit.contain,
-                      errorBuilder: (context, error, stackTrace) => Text(
-                        widget.difficultyName,
-                        style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w900,
-                          color: Color(0xFFDC2626),
-                        ),
+                    errorBuilder: (context, error, stackTrace) => Text(
+                      widget.difficultyName,
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w900,
+                        color: Color(0xFFDC2626),
                       ),
                     ),
                   ),
@@ -455,9 +477,6 @@ class _GameScreenState extends State<GameScreen> {
           color: const Color(0xFF3B82F6),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: Colors.black, width: 2.5),
-          boxShadow: const [
-            BoxShadow(color: Colors.black38, offset: Offset(0, 3), blurRadius: 2),
-          ],
         ),
         child: Row(
           children: [
@@ -487,7 +506,6 @@ class _GameScreenState extends State<GameScreen> {
             color: Colors.white,
             fontWeight: FontWeight.w900,
             fontSize: 14,
-            shadows: [Shadow(color: Colors.black, offset: Offset(1, 1), blurRadius: 2)],
           ),
         ),
         const SizedBox(height: 10),
@@ -495,11 +513,11 @@ class _GameScreenState extends State<GameScreen> {
         const SizedBox(height: 10),
         _buildMarioWhiteStatBox('MOVIMIENTOS', '$_moves'),
         const SizedBox(height: 10),
-        const Text(
-          '¡TÚ PUEDES!\nCada movimiento cuenta.',
+        Text(
+          _isPaused ? '¡PARTIDA PAUSADA!' : '¡TÚ PUEDES!\nCada movimiento cuenta.',
           textAlign: TextAlign.center,
           style: TextStyle(
-            color: Colors.white70,
+            color: _isPaused ? const Color(0xFFFFCA28) : Colors.white70,
             fontSize: 10,
             fontWeight: FontWeight.bold,
           ),
@@ -542,7 +560,6 @@ class _GameScreenState extends State<GameScreen> {
                           color: Color(0xFF1E293B),
                           fontSize: 11,
                           fontWeight: FontWeight.w900,
-                          letterSpacing: 0.5,
                         ),
                       ),
                       const SizedBox(height: 1),
@@ -565,7 +582,6 @@ class _GameScreenState extends State<GameScreen> {
     );
   }
 
-  // PANEL DERECHO SOLO CON PAUSA Y REINICIAR
   Widget _buildRightActionsPanel() {
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -576,16 +592,20 @@ class _GameScreenState extends State<GameScreen> {
             color: Colors.white,
             fontWeight: FontWeight.w900,
             fontSize: 14,
-            shadows: [Shadow(color: Colors.black, offset: Offset(1, 1), blurRadius: 2)],
           ),
         ),
         const SizedBox(height: 10),
-        _build3DActionButton('PAUSA', const Color(0xFFEF4444), Icons.pause_rounded, () {}),
+        _build3DActionButton(
+          _isPaused ? 'REANUDAR' : 'PAUSA',
+          _isPaused ? const Color(0xFF22C55E) : const Color(0xFFEF4444),
+          _isPaused ? Icons.play_arrow_rounded : Icons.pause_rounded,
+          _togglePause,
+        ),
         const SizedBox(height: 10),
         _build3DActionButton('REINICIAR', const Color(0xFF22C55E), Icons.refresh_rounded, _initNewGame),
         const SizedBox(height: 8),
         const Text(
-          'ESC para pausar',
+          'Toca PAUSA para detener',
           style: TextStyle(
             color: Colors.white60,
             fontSize: 10,
@@ -626,7 +646,6 @@ class _GameScreenState extends State<GameScreen> {
               style: const TextStyle(
                 fontWeight: FontWeight.w900,
                 fontSize: 13,
-                letterSpacing: 0.5,
               ),
             ),
           ],
@@ -636,40 +655,77 @@ class _GameScreenState extends State<GameScreen> {
   }
 
   Widget _buildPuzzleBoard() {
-    return Container(
-      constraints: const BoxConstraints(maxWidth: 420, maxHeight: 420),
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: const Color(0xFF1E3A8A),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFF1E293B), width: 4),
-        boxShadow: const [
-          BoxShadow(color: Colors.black54, offset: Offset(0, 6), blurRadius: 6),
-        ],
-      ),
-      child: GridView.builder(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: widget.gridSize,
-          crossAxisSpacing: 6,
-          mainAxisSpacing: 6,
+    return Stack(
+      children: [
+        Container(
+          constraints: const BoxConstraints(maxWidth: 420, maxHeight: 420),
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: const Color(0xFF1E3A8A),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: const Color(0xFF1E293B), width: 4),
+          ),
+          child: GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: widget.gridSize,
+              crossAxisSpacing: 6,
+              mainAxisSpacing: 6,
+            ),
+            itemCount: _board.length,
+            itemBuilder: (context, index) {
+              int tileValue = _board[index];
+              if (tileValue == 0) {
+                return Container(
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF0F172A),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: Colors.black54, width: 2),
+                  ),
+                );
+              }
+              return _buildPuzzleTile(tileValue, () => _onTileTap(index));
+            },
+          ),
         ),
-        itemCount: _board.length,
-        itemBuilder: (context, index) {
-          int tileValue = _board[index];
-          if (tileValue == 0) {
-            return Container(
+
+        if (_isPaused)
+          Positioned.fill(
+            child: Container(
               decoration: BoxDecoration(
-                color: const Color(0xFF0F172A),
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: Colors.black54, width: 2),
+                color: Colors.black54,
+                borderRadius: BorderRadius.circular(20),
               ),
-            );
-          }
-          return _buildPuzzleTile(tileValue, () => _onTileTap(index));
-        },
-      ),
+              child: Center(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFCA28),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: Colors.black, width: 3),
+                  ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.pause_rounded, color: Colors.black, size: 28),
+                      SizedBox(width: 8),
+                      Text(
+                        'PAUSADO',
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 22,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 1.2,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+      ],
     );
   }
 
@@ -701,13 +757,9 @@ class _GameScreenState extends State<GameScreen> {
                     Text(
                       '$value',
                       style: TextStyle(
-                        color: Colors.white,
-                        fontSize: widget.gridSize == 5 ? 20 : (widget.gridSize == 4 ? 24 : 30),
+                        color: Colors.black,
+                        fontSize: widget.gridSize == 5 ? 22 : (widget.gridSize == 4 ? 26 : 32),
                         fontWeight: FontWeight.w900,
-                        shadows: const [
-                          Shadow(color: Colors.black, offset: Offset(2, 2), blurRadius: 2),
-                          Shadow(color: Colors.black, offset: Offset(-1, -1), blurRadius: 1),
-                        ],
                       ),
                     ),
                   ],

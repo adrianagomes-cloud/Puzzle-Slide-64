@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../services/sound_service.dart';
 
 class HowToPlayScreen extends StatefulWidget {
   const HowToPlayScreen({super.key});
@@ -57,7 +58,6 @@ class _HowToPlayScreenState extends State<HowToPlayScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          // 1. FONDO DE PANTALLA
           Positioned.fill(
             child: Image.asset(
               'lib/assets/Fondo.jpg',
@@ -67,19 +67,12 @@ class _HowToPlayScreenState extends State<HowToPlayScreen> {
               ),
             ),
           ),
-
-          // 2. CAPA PRINCIPAL
           SafeArea(
             child: Column(
               children: [
                 const SizedBox(height: 16),
-
-                // LOGO / BANNER CÓMO JUGAR CON LA IMAGEN Comojugar.png
                 _buildHeaderBanner(),
-
                 const SizedBox(height: 16),
-
-                // CONTENIDO CENTRADO Y ADAPTATIVO
                 Expanded(
                   child: Center(
                     child: Container(
@@ -99,20 +92,22 @@ class _HowToPlayScreenState extends State<HowToPlayScreen> {
                     ),
                   ),
                 ),
-
                 const SizedBox(height: 12),
               ],
             ),
           ),
 
-          // 3. BOTÓN VOLVER
+          // BOTÓN FLOTANTE ROJO -> SONIDO KLICK
           Positioned(
             top: 24,
             left: 20,
             child: SafeArea(
               child: InkWell(
                 borderRadius: BorderRadius.circular(14),
-                onTap: () => Navigator.pop(context),
+                onTap: () {
+                  SoundService.playKlickSound();
+                  Navigator.pop(context);
+                },
                 child: Container(
                   width: 48,
                   height: 48,
@@ -121,18 +116,10 @@ class _HowToPlayScreenState extends State<HowToPlayScreen> {
                     borderRadius: BorderRadius.circular(14),
                     border: Border.all(color: Colors.black, width: 3.5),
                     boxShadow: const [
-                      BoxShadow(
-                        color: Colors.black45,
-                        offset: Offset(0, 4),
-                        blurRadius: 3,
-                      ),
+                      BoxShadow(color: Colors.black45, offset: Offset(0, 4), blurRadius: 3),
                     ],
                   ),
-                  child: const Icon(
-                    Icons.arrow_back_rounded,
-                    color: Colors.white,
-                    size: 28,
-                  ),
+                  child: const Icon(Icons.arrow_back_rounded, color: Colors.white, size: 28),
                 ),
               ),
             ),
@@ -142,7 +129,6 @@ class _HowToPlayScreenState extends State<HowToPlayScreen> {
     );
   }
 
-  // BANNER SUPERIOR CON LA IMAGEN Comojugar.png
   Widget _buildHeaderBanner() {
     return Container(
       width: double.infinity,
@@ -170,7 +156,6 @@ class _HowToPlayScreenState extends State<HowToPlayScreen> {
                   Positioned(left: 8, bottom: 8, child: _buildDot()),
                   Positioned(right: 8, top: 8, child: _buildDot()),
                   Positioned(right: 8, bottom: 8, child: _buildDot()),
-
                   Image.asset(
                     'lib/assets/Comojugar.png',
                     height: 42,
@@ -181,10 +166,6 @@ class _HowToPlayScreenState extends State<HowToPlayScreen> {
                         fontSize: 24,
                         fontWeight: FontWeight.w900,
                         color: Color(0xFFDC2626),
-                        letterSpacing: 1.2,
-                        shadows: [
-                          Shadow(color: Colors.black, offset: Offset(1.5, 1.5), blurRadius: 1),
-                        ],
                       ),
                     ),
                   ),
@@ -215,9 +196,6 @@ class _HowToPlayScreenState extends State<HowToPlayScreen> {
         color: const Color(0xFF1E3A8A),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: Colors.black, width: 3.5),
-        boxShadow: const [
-          BoxShadow(color: Colors.black45, offset: Offset(0, 5), blurRadius: 4),
-        ],
       ),
       child: Column(
         children: [
@@ -227,25 +205,21 @@ class _HowToPlayScreenState extends State<HowToPlayScreen> {
               const Icon(Icons.touch_app_rounded, color: Color(0xFFFFCA28), size: 22),
               const SizedBox(width: 8),
               const Text(
-                '¡PRUEBA AQUI MISMO!',
+                '¡PRUEBA AQUÍ MISMO!',
                 style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.w900,
                   fontSize: 16,
-                  letterSpacing: 0.8,
                 ),
               ),
               const Spacer(),
               IconButton(
                 icon: const Icon(Icons.refresh_rounded, color: Colors.white70),
-                tooltip: 'Reiniciar prueba',
                 onPressed: _resetDemoBoard,
               ),
             ],
           ),
           const SizedBox(height: 10),
-
-          // TABLERO MINI 2x2
           SizedBox(
             width: 180,
             height: 180,
@@ -292,9 +266,6 @@ class _HowToPlayScreenState extends State<HowToPlayScreen> {
                                   color: Colors.white,
                                   fontSize: 26,
                                   fontWeight: FontWeight.w900,
-                                  shadows: [
-                                    Shadow(color: Colors.black, offset: Offset(2, 2), blurRadius: 2),
-                                  ],
                                 ),
                               ),
                             ),
@@ -310,11 +281,7 @@ class _HowToPlayScreenState extends State<HowToPlayScreen> {
           const SizedBox(height: 8),
           const Text(
             'Haz clic en la ficha 3 para deslizarla a la casilla vacía.',
-            style: TextStyle(
-              color: Colors.white70,
-              fontSize: 11,
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.bold),
           ),
         ],
       ),
@@ -323,15 +290,8 @@ class _HowToPlayScreenState extends State<HowToPlayScreen> {
 
   Widget _buildInstructionCard() {
     final currentInstruction = _instructions[_instructionStep];
-
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 300),
-      transitionBuilder: (Widget child, Animation<double> animation) {
-        return FadeTransition(
-          opacity: animation,
-          child: ScaleTransition(scale: animation, child: child),
-        );
-      },
       child: Container(
         key: ValueKey<int>(_instructionStep),
         width: double.infinity,
@@ -340,9 +300,6 @@ class _HowToPlayScreenState extends State<HowToPlayScreen> {
           color: Colors.white,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(color: Colors.black, width: 3.5),
-          boxShadow: const [
-            BoxShadow(color: Colors.black38, offset: Offset(0, 5), blurRadius: 3),
-          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -353,7 +310,6 @@ class _HowToPlayScreenState extends State<HowToPlayScreen> {
                 color: Color(0xFFB45309),
                 fontSize: 16,
                 fontWeight: FontWeight.w900,
-                letterSpacing: 0.6,
               ),
             ),
             const SizedBox(height: 8),
@@ -363,7 +319,6 @@ class _HowToPlayScreenState extends State<HowToPlayScreen> {
                 color: Color(0xFF1E293B),
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
-                height: 1.35,
               ),
             ),
           ],
@@ -382,10 +337,6 @@ class _HowToPlayScreenState extends State<HowToPlayScreen> {
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF3B82F6),
               foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-                side: const BorderSide(color: Colors.black, width: 2.5),
-              ),
             ),
             onPressed: _instructionStep > 0
                 ? () {
@@ -395,14 +346,13 @@ class _HowToPlayScreenState extends State<HowToPlayScreen> {
                   }
                 : null,
             icon: const Icon(Icons.arrow_back_rounded, size: 18),
-            label: const Text('Anterior', style: TextStyle(fontWeight: FontWeight.bold)),
+            label: const Text('Anterior'),
           ),
         ),
         Row(
           children: List.generate(_instructions.length, (index) {
             bool isActive = index == _instructionStep;
-            return AnimatedContainer(
-              duration: const Duration(milliseconds: 250),
+            return Container(
               margin: const EdgeInsets.symmetric(horizontal: 4),
               width: isActive ? 22 : 10,
               height: 10,
@@ -420,10 +370,6 @@ class _HowToPlayScreenState extends State<HowToPlayScreen> {
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF22C55E),
               foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-                side: const BorderSide(color: Colors.black, width: 2.5),
-              ),
             ),
             onPressed: _instructionStep < _instructions.length - 1
                 ? () {
@@ -433,7 +379,7 @@ class _HowToPlayScreenState extends State<HowToPlayScreen> {
                   }
                 : null,
             icon: const Icon(Icons.arrow_forward_rounded, size: 18),
-            label: const Text('Siguiente', style: TextStyle(fontWeight: FontWeight.bold)),
+            label: const Text('Siguiente'),
           ),
         ),
       ],

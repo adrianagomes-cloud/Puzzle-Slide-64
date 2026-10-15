@@ -1,9 +1,22 @@
 import 'package:flutter/material.dart';
+import '../services/sound_service.dart';
 import 'difficulty_selection_screen.dart';
 import 'how_to_play_screen.dart';
 
-class MainMenuScreen extends StatelessWidget {
+class MainMenuScreen extends StatefulWidget {
   const MainMenuScreen({super.key});
+
+  @override
+  State<MainMenuScreen> createState() => _MainMenuScreenState();
+}
+
+class _MainMenuScreenState extends State<MainMenuScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Inicia la música de fondo al abrir el menú principal
+    SoundService.startBgm();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,13 +41,8 @@ class MainMenuScreen extends StatelessWidget {
               child: Column(
                 children: [
                   const SizedBox(height: 36),
-
-                  // BANNER SUPERIOR CON LOGO PUZZLE SLIDE 64 (EFECTO 3D)
                   _buildHeaderBanner(),
-
                   const SizedBox(height: 12),
-
-                  // SUBTÍTULO
                   const Text(
                     '¡Ordena las fichas y supera el desafío!',
                     textAlign: TextAlign.center,
@@ -51,18 +59,14 @@ class MainMenuScreen extends StatelessWidget {
                       ],
                     ),
                   ),
-
-                  // ESPACIADO EQUILIBRADO PARA CENTRAR BOTONES
                   const Spacer(flex: 2),
-
-                  // BOTONES DEL MENÚ CENTRADOS
                   Center(
                     child: Container(
                       constraints: const BoxConstraints(maxWidth: 440),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          // 1. BOTÓN JUGAR (MARIO) -> NAVEGA A SELECCIÓN DE DIFICULTAD
+                          // 1. BOTÓN JUGAR (MARIO) -> Mantiene la BGM al pasar a Selección de Nivel
                           _build3DArcadeButton(
                             text: 'JUGAR',
                             imagePath: 'lib/assets/mario.png',
@@ -70,18 +74,21 @@ class MainMenuScreen extends StatelessWidget {
                             baseColor: const Color(0xFF991B1B),
                             badgeColor: const Color(0xFFB91C1C),
                             textColor: Colors.white,
-                            onPressed: () {
-                              Navigator.push(
+                            onPressed: () async {
+                              SoundService.playEnterLevelSound();
+                              await Navigator.push(
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) => const DifficultySelectionScreen(),
                                 ),
                               );
+                              // Al volver de Selección de Nivel / Juego, asegura que la BGM suene
+                              SoundService.startBgm();
                             },
                           ),
                           const SizedBox(height: 14),
 
-                          // 2. BOTÓN RÉCORDS (ESTRELLITA)
+                          // 2. BOTÓN RÉCORDS
                           _build3DArcadeButton(
                             text: 'RÉCORDS',
                             imagePath: 'lib/assets/estrellita.png',
@@ -90,6 +97,7 @@ class MainMenuScreen extends StatelessWidget {
                             badgeColor: const Color(0xFFD97706),
                             textColor: const Color(0xFF1E293B),
                             onPressed: () {
+                              SoundService.play1UpSound();
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
                                   content: Text('Pantalla de Récords en desarrollo...'),
@@ -100,7 +108,7 @@ class MainMenuScreen extends StatelessWidget {
                           ),
                           const SizedBox(height: 14),
 
-                          // 3. BOTÓN OPCIONES (PLANTA PIRAÑA)
+                          // 3. BOTÓN OPCIONES
                           _build3DArcadeButton(
                             text: 'OPCIONES',
                             imagePath: 'lib/assets/planta.png',
@@ -109,6 +117,7 @@ class MainMenuScreen extends StatelessWidget {
                             badgeColor: const Color(0xFF15803D),
                             textColor: Colors.white,
                             onPressed: () {
+                              SoundService.playSettingsSound();
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
                                   content: Text('Pantalla de Opciones en desarrollo...'),
@@ -121,14 +130,13 @@ class MainMenuScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-
                   const Spacer(flex: 3),
                 ],
               ),
             ),
           ),
 
-          // 3. BOTÓN "CÓMO JUGAR" (BLOQUE ESQUINA SUPERIOR DERECHA)
+          // 3. BOTÓN CÓMO JUGAR -> Detiene BGM al entrar y la reinicia al salir
           Positioned(
             top: 16,
             right: 25,
@@ -138,13 +146,16 @@ class MainMenuScreen extends StatelessWidget {
                 children: [
                   InkWell(
                     borderRadius: BorderRadius.circular(12),
-                    onTap: () {
-                      Navigator.push(
+                    onTap: () async {
+                      SoundService.playCoinSound();
+                      SoundService.stopBgm(); // Detiene música en "Cómo Jugar"
+                      await Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) => const HowToPlayScreen(),
                         ),
                       );
+                      SoundService.startBgm(); // Reanuda la música al regresar
                     },
                     child: SizedBox(
                       width: 87,
@@ -195,7 +206,6 @@ class MainMenuScreen extends StatelessWidget {
     );
   }
 
-  // WIDGET BANNER SUPERIOR CON ESTILO 3D
   Widget _buildHeaderBanner() {
     return Container(
       width: double.infinity,
@@ -209,10 +219,7 @@ class MainMenuScreen extends StatelessWidget {
       child: Stack(
         children: [
           Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 7,
+            top: 0, left: 0, right: 0, bottom: 7,
             child: Container(
               decoration: BoxDecoration(
                 color: const Color(0xFFFFCA28),
@@ -225,7 +232,6 @@ class MainMenuScreen extends StatelessWidget {
                   Positioned(left: 10, bottom: 10, child: _buildCornerDot()),
                   Positioned(right: 10, top: 10, child: _buildCornerDot()),
                   Positioned(right: 10, bottom: 10, child: _buildCornerDot()),
-
                   Image.asset(
                     'lib/assets/Nombre.png',
                     height: 60,
@@ -237,13 +243,6 @@ class MainMenuScreen extends StatelessWidget {
                         fontWeight: FontWeight.w900,
                         color: Color(0xFFDC2626),
                         letterSpacing: 1.5,
-                        shadows: [
-                          Shadow(
-                            color: Colors.black,
-                            offset: Offset(2, 2),
-                            blurRadius: 2,
-                          ),
-                        ],
                       ),
                     ),
                   ),
@@ -267,7 +266,6 @@ class MainMenuScreen extends StatelessWidget {
     );
   }
 
-  // WIDGET DE BOTÓN 3D REUTILIZABLE
   Widget _build3DArcadeButton({
     required String text,
     IconData? icon,
@@ -288,10 +286,7 @@ class MainMenuScreen extends StatelessWidget {
       child: Stack(
         children: [
           Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 6,
+            top: 0, left: 0, right: 0, bottom: 6,
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12),
               decoration: BoxDecoration(
@@ -300,7 +295,6 @@ class MainMenuScreen extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  // CUADRO DEL ICONO / IMAGEN
                   Container(
                     width: 42,
                     height: 42,
@@ -326,8 +320,6 @@ class MainMenuScreen extends StatelessWidget {
                           ),
                   ),
                   const SizedBox(width: 14),
-
-                  // TEXTO DEL BOTÓN
                   Text(
                     text,
                     style: TextStyle(
@@ -337,9 +329,7 @@ class MainMenuScreen extends StatelessWidget {
                       letterSpacing: 1.0,
                     ),
                   ),
-
                   const Spacer(),
-
                   Icon(
                     Icons.chevron_right_rounded,
                     color: textColor,
@@ -349,7 +339,6 @@ class MainMenuScreen extends StatelessWidget {
               ),
             ),
           ),
-
           Positioned.fill(
             child: Material(
               color: Colors.transparent,
