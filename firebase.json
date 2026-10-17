@@ -1,1 +1,39 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"puzzle-slide-64","appId":"1:1062160674844:android:c67ef46e50cd2c423f2fd9","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"puzzle-slide-64","configurations":{"android":"1:1062160674844:android:c67ef46e50cd2c423f2fd9","ios":"1:1062160674844:ios:85ea7fe1b754d4703f2fd9","macos":"1:1062160674844:ios:85ea7fe1b754d4703f2fd9","web":"1:1062160674844:web:b8978729891f33b33f2fd9","windows":"1:1062160674844:web:addeca60632a94c93f2fd9"}}}}}}
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "puzzle-slide-64",
+          "appId": "1:1062160674844:android:c67ef46e50cd2c423f2fd9",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "puzzle-slide-64",
+          "configurations": {
+            "android": "1:1062160674844:android:c67ef46e50cd2c423f2fd9",
+            "ios": "1:1062160674844:ios:85ea7fe1b754d4703f2fd9",
+            "macos": "1:1062160674844:ios:85ea7fe1b754d4703f2fd9",
+            "web": "1:1062160674844:web:b8978729891f33b33f2fd9",
+            "windows": "1:1062160674844:web:addeca60632a94c93f2fd9"
+          }
+        }
+      }
+    }
+  },
+  "hosting": {
+    "public": "build/web",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  }
+}

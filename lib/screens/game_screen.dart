@@ -28,11 +28,14 @@ class _GameScreenState extends State<GameScreen> {
   bool _isGameWon = false;
   bool _isPaused = false;
 
+  // Estado para la animación suave de deslizamiento
+  int? _animatedTileValue;
+  Offset _animationStartOffset = Offset.zero;
+
   @override
   void initState() {
     super.initState();
     _isSoundOn = SoundService.isSoundOn;
-    // Carga la canción según la dificultad (sin reiniciar si ya suena la misma)
     SoundService.startInGameBgm(widget.difficultyName);
     _initNewGame();
   }
@@ -72,6 +75,8 @@ class _GameScreenState extends State<GameScreen> {
     _moves = 0;
     _isGameWon = false;
     _isPaused = false;
+    _animatedTileValue = null;
+    _animationStartOffset = Offset.zero;
 
     int totalTiles = widget.gridSize * widget.gridSize;
     List<int> tiles = List.generate(totalTiles, (index) => (index + 1) % totalTiles);
@@ -171,7 +176,16 @@ class _GameScreenState extends State<GameScreen> {
 
       SoundService.playKlickSound();
 
+      // Dirección del movimiento relativo
+      double dx = (tileCol - emptyCol).toDouble();
+      double dy = (tileRow - emptyRow).toDouble();
+
+      int tileValue = _board[index];
+
       setState(() {
+        _animatedTileValue = tileValue;
+        _animationStartOffset = Offset(dx, dy);
+
         _board[emptyIndex] = _board[index];
         _board[index] = 0;
         _moves++;
@@ -318,8 +332,6 @@ class _GameScreenState extends State<GameScreen> {
                       const SizedBox(width: 8),
                       Expanded(child: _buildHeaderBanner()),
                       const SizedBox(width: 8),
-
-                      // BOTÓN SONIDO INTEGRADO
                       _buildTopPillButton(
                         icon: _isSoundOn ? Icons.volume_up_rounded : Icons.volume_off_rounded,
                         label: 'SONIDO',
@@ -728,7 +740,26 @@ class _GameScreenState extends State<GameScreen> {
                   ),
                 );
               }
-              return _buildPuzzleTile(tileValue, () => _onTileTap(index));
+
+              // Animación fluida mediante TweenAnimationBuilder suave
+              bool isAnimatingTile = tileValue == _animatedTileValue;
+
+              return TweenAnimationBuilder<Offset>(
+                key: ValueKey<int>(tileValue),
+                tween: Tween<Offset>(
+                  begin: isAnimatingTile ? _animationStartOffset : Offset.zero,
+                  end: Offset.zero,
+                ),
+                duration: const Duration(milliseconds: 160),
+                curve: Curves.easeOutQuad,
+                builder: (context, offset, child) {
+                  return FractionalTranslation(
+                    translation: offset,
+                    child: child,
+                  );
+                },
+                child: _buildPuzzleTile(tileValue, () => _onTileTap(index)),
+              );
             },
           ),
         ),

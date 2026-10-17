@@ -17,7 +17,6 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
   @override
   void initState() {
     super.initState();
-    // Inicia la música de fondo al abrir el menú principal
     SoundService.startBgm();
   }
 
@@ -40,18 +39,18 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
           // 2. CAPA DE INTERFAZ PRINCIPAL
           SafeArea(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Column(
                 children: [
-                  const SizedBox(height: 36),
-                  _buildHeaderBanner(),
                   const SizedBox(height: 12),
+                  _buildHeaderBanner(),
+                  const SizedBox(height: 8),
                   const Text(
                     '¡Ordena las fichas y supera el desafío!',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 18,
+                      fontSize: 15,
                       fontWeight: FontWeight.w800,
                       shadows: [
                         Shadow(
@@ -69,7 +68,6 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          // 1. BOTÓN JUGAR (MARIO)
                           _build3DArcadeButton(
                             text: 'JUGAR',
                             imagePath: 'lib/assets/mario.png',
@@ -89,9 +87,7 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
                               SoundService.startBgm();
                             },
                           ),
-                          const SizedBox(height: 14),
-
-                          // 2. BOTÓN RÉCORDS
+                          const SizedBox(height: 12),
                           _build3DArcadeButton(
                             text: 'RÉCORDS',
                             imagePath: 'lib/assets/estrellita.png',
@@ -108,9 +104,7 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
                               );
                             },
                           ),
-                          const SizedBox(height: 14),
-
-                          // 3. BOTÓN OPCIONES
+                          const SizedBox(height: 12),
                           _build3DArcadeButton(
                             text: 'OPCIONES',
                             imagePath: 'lib/assets/planta.png',
@@ -137,13 +131,13 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
             ),
           ),
 
-          // 3. BOTÓN LADO IZQUIERDO -> TE LLEVA DE REGRESO AL TÍTULO
+          // 3. BOTÓN REGRESO AL TÍTULO (ARRIBA IZQUIERDA)
           Positioned(
-            top: 16,
-            left: 20,
+            top: 12,
+            left: 12,
             child: SafeArea(
               child: InkWell(
-                borderRadius: BorderRadius.circular(14),
+                borderRadius: BorderRadius.circular(12),
                 onTap: () async {
                   await SoundService.playKlickSound();
                   if (!mounted) return;
@@ -155,31 +149,33 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
                   );
                 },
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                   decoration: BoxDecoration(
                     color: const Color(0xFFEF4444),
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: Colors.black, width: 3.5),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.black, width: 2.5),
                     boxShadow: const [
                       BoxShadow(
                         color: Colors.black45,
-                        offset: Offset(0, 4),
-                        blurRadius: 3,
+                        offset: Offset(0, 3),
+                        blurRadius: 2,
                       ),
                     ],
                   ),
                   child: const Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.arrow_back_rounded, color: Colors.white, size: 20),
+                      Icon(Icons.arrow_back_rounded,
+                          color: Colors.white, size: 18),
                       SizedBox(width: 4),
                       Text(
                         'TÍTULO',
                         style: TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.w900,
-                          fontSize: 13,
-                          letterSpacing: 0.8,
+                          fontSize: 12,
+                          letterSpacing: 0.6,
                         ),
                       ),
                     ],
@@ -189,68 +185,67 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
             ),
           ),
 
-          // 4. BOTÓN LADO DERECHO -> CÓMO JUGAR
+          // 4. BLOQUE ? (CÓMO JUGAR) - EN EL LADO DERECHO, DEBAJO DEL NIVEL DE OPCIONES
           Positioned(
-            top: 16,
-            right: 25,
+            right: 24,
+            bottom: 120,
             child: SafeArea(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  InkWell(
-                    borderRadius: BorderRadius.circular(12),
-                    onTap: () async {
-                      SoundService.playCoinSound();
-                      SoundService.stopBgm();
-                      await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const HowToPlayScreen(),
-                        ),
-                      );
-                      SoundService.startBgm();
-                    },
-                    child: SizedBox(
-                      width: 87,
-                      height: 72,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(16),
+                onTap: () async {
+                  SoundService.playCoinSound();
+                  SoundService.stopBgm();
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const HowToPlayScreen(),
+                    ),
+                  );
+                  SoundService.startBgm();
+                },
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SizedBox(
+                      width: 85,
+                      height: 85,
                       child: Image.asset(
                         'lib/assets/bloque.png',
                         fit: BoxFit.contain,
-                        errorBuilder: (context, error, stackTrace) => Container(
-                          width: 60,
-                          height: 60,
+                        errorBuilder: (context, error, stackTrace) =>
+                            Container(
                           decoration: BoxDecoration(
                             color: const Color(0xFFFFCA28),
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: Colors.black, width: 3),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: Colors.black, width: 3.5),
                           ),
                           child: const Icon(
                             Icons.help_outline_rounded,
-                            size: 36,
+                            size: 48,
                             color: Colors.black,
                           ),
                         ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 4),
-                  const Text(
-                    'CÓMO JUGAR',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 0.6,
-                      shadows: [
-                        Shadow(
-                          color: Colors.black,
-                          offset: Offset(1, 1),
-                          blurRadius: 3,
-                        ),
-                      ],
+                    const SizedBox(height: 4),
+                    const Text(
+                      'CÓMO JUGAR',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 0.6,
+                        shadows: [
+                          Shadow(
+                            color: Colors.black,
+                            offset: Offset(1.5, 1.5),
+                            blurRadius: 3,
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
@@ -262,12 +257,12 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
   Widget _buildHeaderBanner() {
     return Container(
       width: double.infinity,
-      constraints: const BoxConstraints(maxWidth: 780),
-      height: 90,
+      constraints: const BoxConstraints(maxWidth: 580),
+      height: 72,
       decoration: BoxDecoration(
         color: const Color(0xFFB45309),
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: Colors.black, width: 3.5),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: Colors.black, width: 3),
       ),
       child: Stack(
         children: [
@@ -275,30 +270,33 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
             top: 0,
             left: 0,
             right: 0,
-            bottom: 7,
+            bottom: 6,
             child: Container(
               decoration: BoxDecoration(
                 color: const Color(0xFFFFCA28),
-                borderRadius: BorderRadius.circular(18),
+                borderRadius: BorderRadius.circular(14),
               ),
               child: Stack(
                 alignment: Alignment.center,
                 children: [
-                  Positioned(left: 10, top: 10, child: _buildCornerDot()),
-                  Positioned(left: 10, bottom: 10, child: _buildCornerDot()),
-                  Positioned(right: 10, top: 10, child: _buildCornerDot()),
-                  Positioned(right: 10, bottom: 10, child: _buildCornerDot()),
-                  Image.asset(
-                    'lib/assets/Nombre.png',
-                    height: 60,
-                    fit: BoxFit.contain,
-                    errorBuilder: (context, error, stackTrace) => const Text(
-                      'PUZZLE SLIDE 64',
-                      style: TextStyle(
-                        fontSize: 32,
-                        fontWeight: FontWeight.w900,
-                        color: Color(0xFFDC2626),
-                        letterSpacing: 1.5,
+                  Positioned(left: 8, top: 8, child: _buildCornerDot()),
+                  Positioned(left: 8, bottom: 8, child: _buildCornerDot()),
+                  Positioned(right: 8, top: 8, child: _buildCornerDot()),
+                  Positioned(right: 8, bottom: 8, child: _buildCornerDot()),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Image.asset(
+                      'lib/assets/Nombre.png',
+                      height: 46,
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) => const Text(
+                        'PUZZLE SLIDE 64',
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w900,
+                          color: Color(0xFFDC2626),
+                          letterSpacing: 1.2,
+                        ),
                       ),
                     ),
                   ),
@@ -313,8 +311,8 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
 
   static Widget _buildCornerDot() {
     return Container(
-      width: 7,
-      height: 7,
+      width: 6,
+      height: 6,
       decoration: const BoxDecoration(
         color: Colors.black,
         shape: BoxShape.circle,
@@ -333,11 +331,11 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
     required VoidCallback onPressed,
   }) {
     return Container(
-      height: 62,
+      height: 54,
       decoration: BoxDecoration(
         color: baseColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.black, width: 3.5),
+        border: Border.all(color: Colors.black, width: 3),
       ),
       child: Stack(
         children: [
@@ -345,7 +343,7 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
             top: 0,
             left: 0,
             right: 0,
-            bottom: 6,
+            bottom: 5,
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12),
               decoration: BoxDecoration(
@@ -355,8 +353,8 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
               child: Row(
                 children: [
                   Container(
-                    width: 42,
-                    height: 42,
+                    width: 36,
+                    height: 36,
                     padding: imagePath != null
                         ? const EdgeInsets.all(3)
                         : EdgeInsets.zero,
@@ -371,30 +369,30 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
                             errorBuilder: (context, error, stackTrace) => Icon(
                               icon ?? Icons.play_arrow_rounded,
                               color: textColor,
-                              size: 24,
+                              size: 20,
                             ),
                           )
                         : Icon(
                             icon,
                             color: textColor,
-                            size: 24,
+                            size: 20,
                           ),
                   ),
-                  const SizedBox(width: 14),
+                  const SizedBox(width: 12),
                   Text(
                     text,
                     style: TextStyle(
                       color: textColor,
-                      fontSize: 20,
+                      fontSize: 17,
                       fontWeight: FontWeight.w900,
-                      letterSpacing: 1.0,
+                      letterSpacing: 0.8,
                     ),
                   ),
                   const Spacer(),
                   Icon(
                     Icons.chevron_right_rounded,
                     color: textColor,
-                    size: 28,
+                    size: 24,
                   ),
                 ],
               ),
