@@ -57,6 +57,13 @@ class SoundService {
   static Future<void> playPauseSound() async =>
       await _playSound('lib/assets/songs/Pause.mp3');
 
+// 7. Hongo / Fácil (Selección de dificultad Fácil)
+  static Future<void> playFacilSound() async =>
+      await _playSound('lib/assets/songs/Mario Mushroom - QuickSounds.com.mp3');
+      // 8. Bowser / Difícil (Selección de dificultad Difícil)
+  static Future<void> playDificilSound() async =>
+      await _playSound('lib/assets/songs/dificil.wav');
+
   // --- MÚSICA DE FONDO EN BUCLE (BGM) ---
   static Future<void> startBgm() async {
     if (!isSoundOn || !musicEnabled || volume == 0 || _isBgmPlaying) return;
