@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../services/sound_service.dart';
+import 'package:puzzle_slide_64/services/sound_service.dart';
 
 class HowToPlayScreen extends StatefulWidget {
   const HowToPlayScreen({super.key});
@@ -26,6 +26,20 @@ class _HowToPlayScreenState extends State<HowToPlayScreen> {
       'desc': 'El cronómetro comenzará automáticamente en cuanto hagas tu primer movimiento. ¡Intenta resolverlo en el menor tiempo y número de toques posibles!',
     },
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    // Inicia la música tutorial.mp3 al entrar a la pantalla
+    SoundService.startHowToPlayBgm();
+  }
+
+  @override
+  void dispose() {
+    // Restaura la música del menú principal al salir de la pantalla
+    SoundService.startBgm();
+    super.dispose();
+  }
 
   void _onDemoTileTap(int index) {
     int emptyIndex = _demoBoard.indexOf(0);
@@ -97,7 +111,7 @@ class _HowToPlayScreenState extends State<HowToPlayScreen> {
             ),
           ),
 
-          // BOTÓN FLOTANTE ROJO -> SONIDO KLICK
+          // BOTÓN FLOTANTE ROJO DE SALIDA
           Positioned(
             top: 24,
             left: 20,

@@ -1,19 +1,18 @@
 import 'package:flutter/material.dart';
-import 'screens/main_menu_screen.dart';
-import 'services/record_service.dart';
-import 'services/sound_service.dart';
+import 'package:puzzle_slide_64/screens/title_screen.dart';
+import 'package:puzzle_slide_64/services/record_service.dart';
+import 'package:puzzle_slide_64/services/sound_service.dart';
 
-Future<void> main() async {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Future.wait([
-    SoundService.initialize(),
-    RecordService.initialize(),
-  ]);
-  runApp(const PuzzleSlide64App());
+  await SoundService.initialize();
+  await RecordService.initialize();
+
+  runApp(const MyApp());
 }
 
-class PuzzleSlide64App extends StatelessWidget {
-  const PuzzleSlide64App({super.key});
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -21,9 +20,9 @@ class PuzzleSlide64App extends StatelessWidget {
       title: 'Puzzle SLiDe 64',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        useMaterial3: true,
+        primarySwatch: Colors.blue,
       ),
-      home: const MainMenuScreen(),
+      home: const TitleScreen(),
     );
   }
 }

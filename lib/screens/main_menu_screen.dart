@@ -4,6 +4,7 @@ import 'difficulty_selection_screen.dart';
 import 'how_to_play_screen.dart';
 import 'options_screen.dart';
 import 'records_screen.dart';
+import 'title_screen.dart';
 
 class MainMenuScreen extends StatefulWidget {
   const MainMenuScreen({super.key});
@@ -68,7 +69,7 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          // 1. BOTÓN JUGAR (MARIO) -> Mantiene la BGM al pasar a Selección de Nivel
+                          // 1. BOTÓN JUGAR (MARIO)
                           _build3DArcadeButton(
                             text: 'JUGAR',
                             imagePath: 'lib/assets/mario.png',
@@ -85,7 +86,6 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
                                       const DifficultySelectionScreen(),
                                 ),
                               );
-                              // Al volver de Selección de Nivel / Juego, asegura que la BGM suene
                               SoundService.startBgm();
                             },
                           ),
@@ -137,7 +137,59 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
             ),
           ),
 
-          // 3. BOTÓN CÓMO JUGAR -> Detiene BGM al entrar y la reinicia al salir
+          // 3. BOTÓN LADO IZQUIERDO -> TE LLEVA DE REGRESO AL TÍTULO
+          Positioned(
+            top: 16,
+            left: 20,
+            child: SafeArea(
+              child: InkWell(
+                borderRadius: BorderRadius.circular(14),
+                onTap: () async {
+                  await SoundService.playKlickSound();
+                  if (!mounted) return;
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const TitleScreen(),
+                    ),
+                  );
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFEF4444),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: Colors.black, width: 3.5),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Colors.black45,
+                        offset: Offset(0, 4),
+                        blurRadius: 3,
+                      ),
+                    ],
+                  ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.arrow_back_rounded, color: Colors.white, size: 20),
+                      SizedBox(width: 4),
+                      Text(
+                        'TÍTULO',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w900,
+                          fontSize: 13,
+                          letterSpacing: 0.8,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+
+          // 4. BOTÓN LADO DERECHO -> CÓMO JUGAR
           Positioned(
             top: 16,
             right: 25,
@@ -149,14 +201,14 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
                     borderRadius: BorderRadius.circular(12),
                     onTap: () async {
                       SoundService.playCoinSound();
-                      SoundService.stopBgm(); // Detiene música en "Cómo Jugar"
+                      SoundService.stopBgm();
                       await Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) => const HowToPlayScreen(),
                         ),
                       );
-                      SoundService.startBgm(); // Reanuda la música al regresar
+                      SoundService.startBgm();
                     },
                     child: SizedBox(
                       width: 87,

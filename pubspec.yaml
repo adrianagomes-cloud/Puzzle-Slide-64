@@ -1,6 +1,6 @@
 name: puzzle_slide_64
-description: "Un juego de rompecabezas deslizante estilo arcade retro."
-publish_to: 'none' # Evita la publicación accidental en pub.dev
+description: "Un juego clásico de deslizar fichas estilo retro arcade 3D."
+publish_to: 'none'
 
 version: 1.0.0+1
 
@@ -11,8 +11,16 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.8
+  
+  # Reproducción de audio y efectos de sonido
   audioplayers: ^6.0.0
-  shared_preferences: ^2.3.3
+  
+  # Almacenamiento local de récords
+  shared_preferences: ^2.2.3
+  
+  # Integración con Firebase para almacenamiento de récords en la nube
+  firebase_core: ^3.1.0
+  cloud_firestore: ^5.0.1
 
 dev_dependencies:
   flutter_test:
@@ -22,7 +30,8 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
-  # Declaración de carpetas de recursos (imágenes y sonidos)
+  # Declaración de imágenes y audios
   assets:
     - lib/assets/
     - lib/assets/songs/
+    - lib/assets/mario.gif

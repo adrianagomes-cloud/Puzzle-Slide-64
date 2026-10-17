@@ -9,6 +9,7 @@ class SoundService {
   static bool isSoundOn = true;
   static bool musicEnabled = true;
   static double volume = 1.0;
+  static String? _currentBgmPath;
   static bool _isBgmPlaying = false;
   static late SharedPreferences _preferences;
 
@@ -17,6 +18,12 @@ class SoundService {
     isSoundOn = _preferences.getBool('sound_enabled') ?? true;
     musicEnabled = _preferences.getBool('music_enabled') ?? true;
     volume = _preferences.getDouble('volume') ?? 1.0;
+
+    if (volume <= 0) {
+      volume = 1.0;
+      await _preferences.setDouble('volume', 1.0);
+    }
+
     await _sfxPlayer.setVolume(volume);
     await _bgmPlayer.setVolume(volume);
   }
@@ -33,47 +40,76 @@ class SoundService {
     }
   }
 
-  // 1. Moneda (Bloque ¿Cómo Jugar?)
   static Future<void> playCoinSound() async =>
       await _playSound('lib/assets/songs/moneda.wav');
 
-  // 2. 1UP (Botón Récords)
   static Future<void> play1UpSound() async =>
       await _playSound('lib/assets/songs/1up.wav');
 
-  // 3. Enter Level (Botón Jugar)
   static Future<void> playEnterLevelSound() async =>
       await _playSound('lib/assets/songs/enter_level_m.wav');
 
-  // 4. Settings (Botón Opciones)
   static Future<void> playSettingsSound() async =>
       await _playSound('lib/assets/songs/Settings.wav');
 
-  // 5. Klick (Botones de retroceso y MENÚ)
   static Future<void> playKlickSound() async =>
       await _playSound('lib/assets/songs/Klick.wav');
 
-  // 6. Pausa (Botón PAUSA) -> Apunta a Pause.mp3
   static Future<void> playPauseSound() async =>
       await _playSound('lib/assets/songs/Pause.mp3');
 
-// 7. Hongo / Fácil (Selección de dificultad Fácil)
+  // SONIDOS DE BOTONES DE DIFICULTAD
   static Future<void> playFacilSound() async =>
       await _playSound('lib/assets/songs/Mario Mushroom - QuickSounds.com.mp3');
-      // 8. Bowser / Difícil (Selección de dificultad Difícil)
-  static Future<void> playDificilSound() async =>
-      await _playSound('lib/assets/songs/dificil.wav');
 
-  // --- MÚSICA DE FONDO EN BUCLE (BGM) ---
+  static Future<void> playMedioSound() async =>
+      await _playSound('lib/assets/songs/burbuja.mp3');
+
+  static Future<void> playDificilSound() async =>
+      await _playSound('lib/assets/songs/dificil.mp3');
+
+  // --- MÚSICA DE FONDO (BGM) ---
   static Future<void> startBgm() async {
-    if (!isSoundOn || !musicEnabled || volume == 0 || _isBgmPlaying) return;
+    await playCustomBgm('lib/assets/songs/bgm_menu.mp3');
+  }
+
+  // MÚSICA DE LA PANTALLA CÓMO JUGAR
+  static Future<void> startHowToPlayBgm() async {
+    await playCustomBgm('lib/assets/songs/tutorial.mp3');
+  }
+
+  // MÚSICA EN EL JUEGO SEGÚN DIFICULTAD
+  static Future<void> startInGameBgm(String difficultyName) async {
+    String songPath;
+    String diff = difficultyName.toUpperCase();
+
+    if (diff.contains('DIFÍCIL') || diff.contains('DIFICIL')) {
+      songPath = 'lib/assets/songs/bowser.mp3';
+    } else if (diff.contains('MEDIO') || diff.contains('NORMAL')) {
+      songPath = 'lib/assets/songs/mundo2.mp3';
+    } else {
+      songPath = 'lib/assets/songs/bgm_menu.mp3';
+    }
+
+    await playCustomBgm(songPath);
+  }
+
+  static Future<void> playCustomBgm(String path) async {
+    if (!isSoundOn || !musicEnabled || volume == 0) return;
+
+    // Si la misma canción ya se encuentra reproduciéndose, no la reinicia
+    if (_isBgmPlaying && _currentBgmPath == path) return;
+
     try {
+      await _bgmPlayer.stop();
       _bgmPlayer.audioCache.prefix = '';
       await _bgmPlayer.setReleaseMode(ReleaseMode.loop);
-      await _bgmPlayer.play(AssetSource('lib/assets/songs/bgm_menu.mp3'));
+      await _bgmPlayer.setVolume(volume);
+      await _bgmPlayer.play(AssetSource(path));
+      _currentBgmPath = path;
       _isBgmPlaying = true;
     } catch (e) {
-      debugPrint('Error iniciando BGM: $e');
+      debugPrint('Error iniciando BGM $path: $e');
     }
   }
 
@@ -81,8 +117,21 @@ class SoundService {
     try {
       await _bgmPlayer.stop();
       _isBgmPlaying = false;
+      _currentBgmPath = null;
     } catch (e) {
       debugPrint('Error deteniendo BGM: $e');
+    }
+  }
+
+  // BOTÓN DE SONIDO EN PANTALLA DE JUEGO
+  static Future<void> toggleSoundInGame(bool enabled, String difficultyName) async {
+    isSoundOn = enabled;
+    await _preferences.setBool('sound_enabled', enabled);
+    if (!isSoundOn) {
+      await _sfxPlayer.stop();
+      await stopBgm();
+    } else {
+      await startInGameBgm(difficultyName);
     }
   }
 
@@ -91,6 +140,9 @@ class SoundService {
     await _preferences.setBool('sound_enabled', enabled);
     if (!isSoundOn) {
       await _sfxPlayer.stop();
+      await stopBgm();
+    } else if (musicEnabled) {
+      await startBgm();
     }
   }
 
@@ -101,7 +153,9 @@ class SoundService {
     await _preferences.setDouble('volume', value);
     if (value == 0) {
       await stopBgm();
-    } else if (musicEnabled) {
+    } else if (musicEnabled && !_isBgmPlaying && _currentBgmPath != null) {
+      await playCustomBgm(_currentBgmPath!);
+    } else if (musicEnabled && !_isBgmPlaying) {
       await startBgm();
     }
   }
@@ -110,7 +164,11 @@ class SoundService {
     musicEnabled = enabled;
     await _preferences.setBool('music_enabled', enabled);
     if (enabled) {
-      await startBgm();
+      if (_currentBgmPath != null) {
+        await playCustomBgm(_currentBgmPath!);
+      } else {
+        await startBgm();
+      }
     } else {
       await stopBgm();
     }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../services/sound_service.dart';
-import 'game_screen.dart';
+import 'package:puzzle_slide_64/screens/game_screen.dart';
+import 'package:puzzle_slide_64/services/sound_service.dart';
 
 class DifficultySelectionScreen extends StatelessWidget {
   const DifficultySelectionScreen({super.key});
@@ -10,7 +10,6 @@ class DifficultySelectionScreen extends StatelessWidget {
     return Scaffold(
       body: Stack(
         children: [
-          // 1. FONDO DE PANTALLA
           Positioned.fill(
             child: Image.asset(
               'lib/assets/Fondo.jpg',
@@ -20,8 +19,6 @@ class DifficultySelectionScreen extends StatelessWidget {
               ),
             ),
           ),
-
-          // 2. CAPA DE INTERFAZ PRINCIPAL
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
@@ -49,7 +46,7 @@ class DifficultySelectionScreen extends StatelessWidget {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          // 1. DIFICULTAD FÁCIL (3x3)
+                          // 1. FÁCIL (MARIO MUSHROOM)
                           _build3DArcadeButton(
                             text: 'FÁCIL (3x3)',
                             imagePath: 'lib/assets/hongo.png',
@@ -58,7 +55,8 @@ class DifficultySelectionScreen extends StatelessWidget {
                             badgeColor: const Color(0xFF15803D),
                             textColor: Colors.white,
                             onPressed: () async {
-                              SoundService.stopBgm(); // Detiene BGM para entrar a jugar
+                              await SoundService.playFacilSound();
+                              if (!context.mounted) return;
                               await Navigator.push(
                                 context,
                                 MaterialPageRoute(
@@ -68,12 +66,12 @@ class DifficultySelectionScreen extends StatelessWidget {
                                   ),
                                 ),
                               );
-                              SoundService.startBgm(); // Reanuda BGM al regresar
+                              await SoundService.startBgm();
                             },
                           ),
                           const SizedBox(height: 14),
 
-                          // 2. DIFICULTAD MEDIO (4x4)
+                          // 2. MEDIO (BURBUJA)
                           _build3DArcadeButton(
                             text: 'MEDIO (4x4)',
                             imagePath: 'lib/assets/calamar.png',
@@ -81,8 +79,10 @@ class DifficultySelectionScreen extends StatelessWidget {
                             baseColor: const Color(0xFFB45309),
                             badgeColor: const Color(0xFFD97706),
                             textColor: const Color(0xFF1E293B),
+                            imageScale: 1.5,
                             onPressed: () async {
-                              SoundService.stopBgm(); // Detiene BGM para entrar a jugar
+                              await SoundService.playMedioSound();
+                              if (!context.mounted) return;
                               await Navigator.push(
                                 context,
                                 MaterialPageRoute(
@@ -92,12 +92,12 @@ class DifficultySelectionScreen extends StatelessWidget {
                                   ),
                                 ),
                               );
-                              SoundService.startBgm(); // Reanuda BGM al regresar
+                              await SoundService.startBgm();
                             },
                           ),
                           const SizedBox(height: 14),
 
-                          // 3. DIFICULTAD DIFÍCIL (5x5)
+                          // 3. DIFÍCIL (DIFÍCIL)
                           _build3DArcadeButton(
                             text: 'DIFÍCIL (5x5)',
                             imagePath: 'lib/assets/bowser.png',
@@ -106,7 +106,8 @@ class DifficultySelectionScreen extends StatelessWidget {
                             badgeColor: const Color(0xFFB91C1C),
                             textColor: Colors.white,
                             onPressed: () async {
-                              SoundService.stopBgm(); // Detiene BGM para entrar a jugar
+                              await SoundService.playDificilSound();
+                              if (!context.mounted) return;
                               await Navigator.push(
                                 context,
                                 MaterialPageRoute(
@@ -116,7 +117,7 @@ class DifficultySelectionScreen extends StatelessWidget {
                                   ),
                                 ),
                               );
-                              SoundService.startBgm(); // Reanuda BGM al regresar
+                              await SoundService.startBgm();
                             },
                           ),
                         ],
@@ -128,16 +129,15 @@ class DifficultySelectionScreen extends StatelessWidget {
               ),
             ),
           ),
-
-          // 3. BOTÓN FLOTANTE ROJO DE ATRÁS -> REPRODUCE KLICK
           Positioned(
             top: 24,
             left: 20,
             child: SafeArea(
               child: InkWell(
                 borderRadius: BorderRadius.circular(14),
-                onTap: () {
-                  SoundService.playKlickSound();
+                onTap: () async {
+                  await SoundService.playKlickSound();
+                  if (!context.mounted) return;
                   Navigator.pop(context);
                 },
                 child: Container(
@@ -228,6 +228,7 @@ class DifficultySelectionScreen extends StatelessWidget {
     required Color badgeColor,
     required Color textColor,
     required VoidCallback onPressed,
+    double imageScale = 1.0,
   }) {
     return Container(
       height: 62,
@@ -251,18 +252,24 @@ class DifficultySelectionScreen extends StatelessWidget {
                   Container(
                     width: 42,
                     height: 42,
-                    padding: const EdgeInsets.all(3),
+                    clipBehavior: Clip.hardEdge,
                     decoration: BoxDecoration(
                       color: badgeColor,
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: Image.asset(
-                      imagePath,
-                      fit: BoxFit.contain,
-                      errorBuilder: (context, error, stackTrace) => Icon(
-                        Icons.videogame_asset_rounded,
-                        color: textColor,
-                        size: 24,
+                    child: Transform.scale(
+                      scale: imageScale,
+                      child: Padding(
+                        padding: const EdgeInsets.all(2),
+                        child: Image.asset(
+                          imagePath,
+                          fit: BoxFit.contain,
+                          errorBuilder: (context, error, stackTrace) => Icon(
+                            Icons.videogame_asset_rounded,
+                            color: textColor,
+                            size: 24,
+                          ),
+                        ),
                       ),
                     ),
                   ),

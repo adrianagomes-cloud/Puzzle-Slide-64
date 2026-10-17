@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
-import '../services/sound_service.dart';
-import '../services/record_service.dart';
+import 'package:puzzle_slide_64/services/record_service.dart';
+import 'package:puzzle_slide_64/services/sound_service.dart';
 
 class GameScreen extends StatefulWidget {
   final int gridSize;
@@ -24,13 +24,16 @@ class _GameScreenState extends State<GameScreen> {
   int _secondsPassed = 0;
   Timer? _timer;
   bool _isTimerRunning = false;
-  bool _isSoundOn = SoundService.isSoundOn;
+  bool _isSoundOn = true;
   bool _isGameWon = false;
   bool _isPaused = false;
 
   @override
   void initState() {
     super.initState();
+    _isSoundOn = SoundService.isSoundOn;
+    // Carga la canción según la dificultad (sin reiniciar si ya suena la misma)
+    SoundService.startInGameBgm(widget.difficultyName);
     _initNewGame();
   }
 
@@ -38,6 +41,17 @@ class _GameScreenState extends State<GameScreen> {
   void dispose() {
     _timer?.cancel();
     super.dispose();
+  }
+
+  String _getBackgroundImagePath() {
+    String diff = widget.difficultyName.toUpperCase();
+    if (diff.contains('DIFÍCIL') || diff.contains('DIFICIL')) {
+      return 'lib/assets/fondodificil.jpg';
+    } else if (diff.contains('MEDIO') || diff.contains('NORMAL')) {
+      return 'lib/assets/fondomedio.jpg';
+    } else {
+      return 'lib/assets/Fondo.jpg';
+    }
   }
 
   String _getDifficultyLogoPath() {
@@ -115,11 +129,9 @@ class _GameScreenState extends State<GameScreen> {
     });
   }
 
-  // --- LÓGICA DE PAUSA (SONIDO SOLO AL PAUSAR) ---
   void _togglePause() {
     if (_isGameWon) return;
 
-    // Solo reproduce el sonido cuando se pulsa PAUSA (no al REANUDAR)
     if (!_isPaused) {
       SoundService.playPauseSound();
     }
@@ -157,16 +169,7 @@ class _GameScreenState extends State<GameScreen> {
         _startTimer();
       }
 
-      Future<void> saveRecordAndShowDialog() async {
-        await RecordService.saveIfBest(
-          difficulty: widget.difficultyName,
-          seconds: _secondsPassed,
-          moves: _moves,
-        );
-        if (mounted) _showWinDialog();
-      }
-
-      bool isSolved = false;
+      SoundService.playKlickSound();
 
       setState(() {
         _board[emptyIndex] = _board[index];
@@ -175,18 +178,24 @@ class _GameScreenState extends State<GameScreen> {
 
         if (_isAlreadySolved(_board)) {
           _isGameWon = true;
-          isSolved = true;
           _timer?.cancel();
+          _showWinDialog();
         }
       });
-
-      if (isSolved) {
-        saveRecordAndShowDialog();
-      }
     }
   }
 
-  void _showWinDialog() {
+  void _showWinDialog() async {
+    await SoundService.playCoinSound();
+
+    final isNewBest = await RecordService.saveIfBest(
+      difficulty: widget.difficultyName,
+      seconds: _secondsPassed,
+      moves: _moves,
+    );
+
+    if (!mounted) return;
+
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -196,12 +205,12 @@ class _GameScreenState extends State<GameScreen> {
           borderRadius: BorderRadius.circular(20),
           side: const BorderSide(color: Colors.black, width: 3.5),
         ),
-        title: const Text(
-          '¡GANASTE!',
+        title: Text(
+          isNewBest ? '¡NUEVO RÉCORD!' : '¡VICTORIA!',
           textAlign: TextAlign.center,
-          style: TextStyle(
+          style: const TextStyle(
             color: Color(0xFFB45309),
-            fontSize: 28,
+            fontSize: 26,
             fontWeight: FontWeight.w900,
           ),
         ),
@@ -219,6 +228,18 @@ class _GameScreenState extends State<GameScreen> {
                 color: Color(0xFF1E293B),
               ),
             ),
+            if (isNewBest) ...[
+              const SizedBox(height: 10),
+              const Text(
+                '★ ¡Has establecido tu mejor marca! ★',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Color(0xFF15803D),
+                  fontWeight: FontWeight.w900,
+                  fontSize: 13,
+                ),
+              ),
+            ],
           ],
         ),
         actionsAlignment: MainAxisAlignment.center,
@@ -267,10 +288,14 @@ class _GameScreenState extends State<GameScreen> {
         children: [
           Positioned.fill(
             child: Image.asset(
-              'lib/assets/Fondo.jpg',
+              _getBackgroundImagePath(),
               fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) => Container(
-                color: const Color(0xFF60A5FA),
+              errorBuilder: (context, error, stackTrace) => Image.asset(
+                'lib/assets/Fondo.jpg',
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) => Container(
+                  color: const Color(0xFF60A5FA),
+                ),
               ),
             ),
           ),
@@ -293,13 +318,15 @@ class _GameScreenState extends State<GameScreen> {
                       const SizedBox(width: 8),
                       Expanded(child: _buildHeaderBanner()),
                       const SizedBox(width: 8),
+
+                      // BOTÓN SONIDO INTEGRADO
                       _buildTopPillButton(
                         icon: _isSoundOn ? Icons.volume_up_rounded : Icons.volume_off_rounded,
                         label: 'SONIDO',
                         onPressed: () {
                           setState(() {
                             _isSoundOn = !_isSoundOn;
-                            SoundService.toggleSound(_isSoundOn);
+                            SoundService.toggleSoundInGame(_isSoundOn, widget.difficultyName);
                           });
                         },
                       ),
@@ -310,7 +337,7 @@ class _GameScreenState extends State<GameScreen> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF1E293B).withValues(alpha: 0.85),
+                    color: const Color(0xFF1E293B).withOpacity(0.85),
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(color: Colors.white24, width: 1.5),
                   ),

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1062160674844",
+    "project_id": "puzzle-slide-64",
+    "storage_bucket": "puzzle-slide-64.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1062160674844:android:c67ef46e50cd2c423f2fd9",
+        "android_client_info": {
+          "package_name": "com.example.puzzle_slide_64"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC_0mv3PocP41Iq4_FHjh-zjznJ6rtW-Qc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
