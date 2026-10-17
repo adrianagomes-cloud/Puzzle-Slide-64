@@ -36,7 +36,7 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
             ),
           ),
 
-          // 2. CAPA DE INTERFAZ PRINCIPAL
+          // 2. CAPA DE INTERFAZ PRINCIPAL (MENÚ CENTRADO)
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -131,13 +131,13 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
             ),
           ),
 
-          // 3. BOTÓN REGRESO AL TÍTULO (ARRIBA IZQUIERDA)
+          // 3. BOTÓN TÍTULO - ABAJO A LA IZQUIERDA (MÁS GRANDE)
           Positioned(
-            top: 12,
-            left: 12,
+            left: 16,
+            bottom: 16,
             child: SafeArea(
               child: InkWell(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(16),
                 onTap: () async {
                   await SoundService.playKlickSound();
                   if (!mounted) return;
@@ -150,16 +150,16 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
                 },
                 child: Container(
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                   decoration: BoxDecoration(
                     color: const Color(0xFFEF4444),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.black, width: 2.5),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: Colors.black, width: 3.5),
                     boxShadow: const [
                       BoxShadow(
                         color: Colors.black45,
-                        offset: Offset(0, 3),
-                        blurRadius: 2,
+                        offset: Offset(0, 4),
+                        blurRadius: 3,
                       ),
                     ],
                   ),
@@ -167,15 +167,15 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(Icons.arrow_back_rounded,
-                          color: Colors.white, size: 18),
-                      SizedBox(width: 4),
+                          color: Colors.white, size: 22),
+                      SizedBox(width: 6),
                       Text(
                         'TÍTULO',
                         style: TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.w900,
-                          fontSize: 12,
-                          letterSpacing: 0.6,
+                          fontSize: 14,
+                          letterSpacing: 0.8,
                         ),
                       ),
                     ],
@@ -185,13 +185,13 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
             ),
           ),
 
-          // 4. BLOQUE ? (CÓMO JUGAR) - EN EL LADO DERECHO, DEBAJO DEL NIVEL DE OPCIONES
+          // 4. BLOQUE CÓMO JUGAR - ABAJO A LA DERECHA (MÁS GRANDE)
           Positioned(
-            right: 24,
-            bottom: 120,
+            right: 16,
+            bottom: 16,
             child: SafeArea(
               child: InkWell(
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(20),
                 onTap: () async {
                   SoundService.playCoinSound();
                   SoundService.stopBgm();
@@ -207,8 +207,8 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     SizedBox(
-                      width: 85,
-                      height: 85,
+                      width: 95,
+                      height: 95,
                       child: Image.asset(
                         'lib/assets/bloque.png',
                         fit: BoxFit.contain,
@@ -216,30 +216,30 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
                             Container(
                           decoration: BoxDecoration(
                             color: const Color(0xFFFFCA28),
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: Colors.black, width: 3.5),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(color: Colors.black, width: 4),
                           ),
                           child: const Icon(
                             Icons.help_outline_rounded,
-                            size: 48,
+                            size: 52,
                             color: Colors.black,
                           ),
                         ),
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 2),
                     const Text(
                       'CÓMO JUGAR',
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 12,
+                        fontSize: 13,
                         fontWeight: FontWeight.w900,
-                        letterSpacing: 0.6,
+                        letterSpacing: 0.8,
                         shadows: [
                           Shadow(
                             color: Colors.black,
-                            offset: Offset(1.5, 1.5),
-                            blurRadius: 3,
+                            offset: Offset(2, 2),
+                            blurRadius: 4,
                           ),
                         ],
                       ),

@@ -30,13 +30,13 @@ class _HowToPlayScreenState extends State<HowToPlayScreen> {
   @override
   void initState() {
     super.initState();
-    // Inicia la música tutorial.mp3 al entrar a la pantalla
+    // Inicia la música tutorial al entrar a la pantalla
     SoundService.startHowToPlayBgm();
   }
 
   @override
   void dispose() {
-    // Restaura la música del menú principal al salir de la pantalla
+    // Restaura la música del menú principal al salir
     SoundService.startBgm();
     super.dispose();
   }
@@ -111,29 +111,29 @@ class _HowToPlayScreenState extends State<HowToPlayScreen> {
             ),
           ),
 
-          // BOTÓN FLOTANTE ROJO DE SALIDA
+          // BOTÓN FLOTANTE ROJO DE SALIDA (ABAJO A LA IZQUIERDA)
           Positioned(
-            top: 24,
+            bottom: 20,
             left: 20,
             child: SafeArea(
               child: InkWell(
-                borderRadius: BorderRadius.circular(14),
+                borderRadius: BorderRadius.circular(16),
                 onTap: () {
                   SoundService.playKlickSound();
                   Navigator.pop(context);
                 },
                 child: Container(
-                  width: 48,
-                  height: 48,
+                  width: 52,
+                  height: 52,
                   decoration: BoxDecoration(
                     color: const Color(0xFFEF4444),
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius: BorderRadius.circular(16),
                     border: Border.all(color: Colors.black, width: 3.5),
                     boxShadow: const [
                       BoxShadow(color: Colors.black45, offset: Offset(0, 4), blurRadius: 3),
                     ],
                   ),
-                  child: const Icon(Icons.arrow_back_rounded, color: Colors.white, size: 28),
+                  child: const Icon(Icons.arrow_back_rounded, color: Colors.white, size: 30),
                 ),
               ),
             ),
