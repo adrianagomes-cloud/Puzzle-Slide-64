@@ -1,7 +1,14 @@
 import 'package:flutter/material.dart';
 import 'screens/main_menu_screen.dart';
+import 'services/record_service.dart';
+import 'services/sound_service.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Future.wait([
+    SoundService.initialize(),
+    RecordService.initialize(),
+  ]);
   runApp(const PuzzleSlide64App());
 }
 

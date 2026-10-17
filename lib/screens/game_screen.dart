@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import '../services/sound_service.dart';
+import '../services/record_service.dart';
 
 class GameScreen extends StatefulWidget {
   final int gridSize;
@@ -23,7 +24,7 @@ class _GameScreenState extends State<GameScreen> {
   int _secondsPassed = 0;
   Timer? _timer;
   bool _isTimerRunning = false;
-  bool _isSoundOn = true;
+  bool _isSoundOn = SoundService.isSoundOn;
   bool _isGameWon = false;
   bool _isPaused = false;
 
@@ -59,7 +60,8 @@ class _GameScreenState extends State<GameScreen> {
     _isPaused = false;
 
     int totalTiles = widget.gridSize * widget.gridSize;
-    List<int> tiles = List.generate(totalTiles, (index) => (index + 1) % totalTiles);
+    List<int> tiles =
+        List.generate(totalTiles, (index) => (index + 1) % totalTiles);
 
     do {
       tiles.shuffle(Random());
@@ -148,8 +150,9 @@ class _GameScreenState extends State<GameScreen> {
     int emptyRow = emptyIndex ~/ size;
     int emptyCol = emptyIndex % size;
 
-    bool isAdjacent = (tileRow == emptyRow && (tileCol - emptyCol).abs() == 1) ||
-        (tileCol == emptyCol && (tileRow - emptyRow).abs() == 1);
+    bool isAdjacent =
+        (tileRow == emptyRow && (tileCol - emptyCol).abs() == 1) ||
+            (tileCol == emptyCol && (tileRow - emptyRow).abs() == 1);
 
     if (isAdjacent) {
       if (!_isTimerRunning) {
@@ -164,10 +167,19 @@ class _GameScreenState extends State<GameScreen> {
         if (_isAlreadySolved(_board)) {
           _isGameWon = true;
           _timer?.cancel();
-          _showWinDialog();
+          _saveRecordAndShowDialog();
         }
       });
     }
+  }
+
+  Future<void> _saveRecordAndShowDialog() async {
+    await RecordService.saveIfBest(
+      difficulty: widget.difficultyName,
+      seconds: _secondsPassed,
+      moves: _moves,
+    );
+    if (mounted) _showWinDialog();
   }
 
   void _showWinDialog() {
@@ -192,7 +204,8 @@ class _GameScreenState extends State<GameScreen> {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.emoji_events_rounded, color: Color(0xFFFFCA28), size: 70),
+            const Icon(Icons.emoji_events_rounded,
+                color: Color(0xFFFFCA28), size: 70),
             const SizedBox(height: 12),
             Text(
               'Tiempo: ${_formatTime(_secondsPassed)}\nMovimientos: $_moves',
@@ -211,25 +224,29 @@ class _GameScreenState extends State<GameScreen> {
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF22C55E),
               foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
             ),
             onPressed: () {
               Navigator.pop(context);
               _initNewGame();
             },
-            child: const Text('Jugar de nuevo', style: TextStyle(fontWeight: FontWeight.bold)),
+            child: const Text('Jugar de nuevo',
+                style: TextStyle(fontWeight: FontWeight.bold)),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFFEF4444),
               foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
             ),
             onPressed: () {
               Navigator.pop(context);
               Navigator.pop(context);
             },
-            child: const Text('Menú Principal', style: TextStyle(fontWeight: FontWeight.bold)),
+            child: const Text('Menú Principal',
+                style: TextStyle(fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -278,12 +295,14 @@ class _GameScreenState extends State<GameScreen> {
                       Expanded(child: _buildHeaderBanner()),
                       const SizedBox(width: 8),
                       _buildTopPillButton(
-                        icon: _isSoundOn ? Icons.volume_up_rounded : Icons.volume_off_rounded,
+                        icon: _isSoundOn
+                            ? Icons.volume_up_rounded
+                            : Icons.volume_off_rounded,
                         label: 'SONIDO',
                         onPressed: () {
                           setState(() {
                             _isSoundOn = !_isSoundOn;
-                            SoundService.isSoundOn = _isSoundOn;
+                            SoundService.toggleSound(_isSoundOn);
                           });
                         },
                       ),
@@ -292,9 +311,10 @@ class _GameScreenState extends State<GameScreen> {
                 ),
                 const SizedBox(height: 8),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF1E293B).withOpacity(0.85),
+                    color: const Color(0xFF1E293B).withValues(alpha: 0.85),
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(color: Colors.white24, width: 1.5),
                   ),
@@ -322,11 +342,15 @@ class _GameScreenState extends State<GameScreen> {
                               mainAxisAlignment: MainAxisAlignment.center,
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
-                                SizedBox(width: 160, child: _buildLeftStatsPanel()),
+                                SizedBox(
+                                    width: 160, child: _buildLeftStatsPanel()),
                                 const SizedBox(width: 16),
-                                Flexible(child: Center(child: _buildPuzzleBoard())),
+                                Flexible(
+                                    child: Center(child: _buildPuzzleBoard())),
                                 const SizedBox(width: 16),
-                                SizedBox(width: 160, child: _buildRightActionsPanel()),
+                                SizedBox(
+                                    width: 160,
+                                    child: _buildRightActionsPanel()),
                               ],
                             );
                           } else {
@@ -334,24 +358,37 @@ class _GameScreenState extends State<GameScreen> {
                               child: Column(
                                 children: [
                                   Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceEvenly,
                                     children: [
-                                      SizedBox(width: 140, child: _buildMarioWhiteStatBox('TIEMPO', _formatTime(_secondsPassed))),
-                                      SizedBox(width: 140, child: _buildMarioWhiteStatBox('MOVIMIENTOS', '$_moves')),
+                                      SizedBox(
+                                          width: 140,
+                                          child: _buildMarioWhiteStatBox(
+                                              'TIEMPO',
+                                              _formatTime(_secondsPassed))),
+                                      SizedBox(
+                                          width: 140,
+                                          child: _buildMarioWhiteStatBox(
+                                              'MOVIMIENTOS', '$_moves')),
                                     ],
                                   ),
                                   const SizedBox(height: 12),
                                   _buildPuzzleBoard(),
                                   const SizedBox(height: 12),
                                   Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceEvenly,
                                     children: [
                                       SizedBox(
                                         width: 130,
                                         child: _build3DActionButton(
                                           _isPaused ? 'REANUDAR' : 'PAUSA',
-                                          _isPaused ? const Color(0xFF22C55E) : const Color(0xFFEF4444),
-                                          _isPaused ? Icons.play_arrow_rounded : Icons.pause_rounded,
+                                          _isPaused
+                                              ? const Color(0xFF22C55E)
+                                              : const Color(0xFFEF4444),
+                                          _isPaused
+                                              ? Icons.play_arrow_rounded
+                                              : Icons.pause_rounded,
                                           _togglePause,
                                         ),
                                       ),
@@ -417,7 +454,10 @@ class _GameScreenState extends State<GameScreen> {
       child: Stack(
         children: [
           Positioned(
-            top: 0, left: 0, right: 0, bottom: 4,
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 4,
             child: Container(
               decoration: BoxDecoration(
                 color: const Color(0xFFFFCA28),
@@ -514,7 +554,9 @@ class _GameScreenState extends State<GameScreen> {
         _buildMarioWhiteStatBox('MOVIMIENTOS', '$_moves'),
         const SizedBox(height: 10),
         Text(
-          _isPaused ? '¡PARTIDA PAUSADA!' : '¡TÚ PUEDES!\nCada movimiento cuenta.',
+          _isPaused
+              ? '¡PARTIDA PAUSADA!'
+              : '¡TÚ PUEDES!\nCada movimiento cuenta.',
           textAlign: TextAlign.center,
           style: TextStyle(
             color: _isPaused ? const Color(0xFFFFCA28) : Colors.white70,
@@ -538,7 +580,10 @@ class _GameScreenState extends State<GameScreen> {
       child: Stack(
         children: [
           Positioned(
-            top: 0, left: 0, right: 0, bottom: 5,
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 5,
             child: Container(
               decoration: BoxDecoration(
                 color: Colors.white,
@@ -602,7 +647,8 @@ class _GameScreenState extends State<GameScreen> {
           _togglePause,
         ),
         const SizedBox(height: 10),
-        _build3DActionButton('REINICIAR', const Color(0xFF22C55E), Icons.refresh_rounded, _initNewGame),
+        _build3DActionButton('REINICIAR', const Color(0xFF22C55E),
+            Icons.refresh_rounded, _initNewGame),
         const SizedBox(height: 8),
         const Text(
           'Toca PAUSA para detener',
@@ -616,7 +662,8 @@ class _GameScreenState extends State<GameScreen> {
     );
   }
 
-  Widget _build3DActionButton(String text, Color color, IconData icon, VoidCallback onTap) {
+  Widget _build3DActionButton(
+      String text, Color color, IconData icon, VoidCallback onTap) {
     return Container(
       width: double.infinity,
       height: 44,
@@ -689,7 +736,6 @@ class _GameScreenState extends State<GameScreen> {
             },
           ),
         ),
-
         if (_isPaused)
           Positioned.fill(
             child: Container(
@@ -699,7 +745,8 @@ class _GameScreenState extends State<GameScreen> {
               ),
               child: Center(
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                   decoration: BoxDecoration(
                     color: const Color(0xFFFFCA28),
                     borderRadius: BorderRadius.circular(14),
@@ -741,7 +788,10 @@ class _GameScreenState extends State<GameScreen> {
         child: Stack(
           children: [
             Positioned(
-              top: 0, left: 0, right: 0, bottom: 4,
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 4,
               child: Container(
                 decoration: BoxDecoration(
                   color: const Color(0xFFFFCA28),
@@ -758,7 +808,9 @@ class _GameScreenState extends State<GameScreen> {
                       '$value',
                       style: TextStyle(
                         color: Colors.black,
-                        fontSize: widget.gridSize == 5 ? 22 : (widget.gridSize == 4 ? 26 : 32),
+                        fontSize: widget.gridSize == 5
+                            ? 22
+                            : (widget.gridSize == 4 ? 26 : 32),
                         fontWeight: FontWeight.w900,
                       ),
                     ),

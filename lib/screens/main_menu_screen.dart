@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../services/sound_service.dart';
 import 'difficulty_selection_screen.dart';
 import 'how_to_play_screen.dart';
+import 'options_screen.dart';
+import 'records_screen.dart';
 
 class MainMenuScreen extends StatefulWidget {
   const MainMenuScreen({super.key});
@@ -79,7 +81,8 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
                               await Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => const DifficultySelectionScreen(),
+                                  builder: (context) =>
+                                      const DifficultySelectionScreen(),
                                 ),
                               );
                               // Al volver de Selección de Nivel / Juego, asegura que la BGM suene
@@ -98,11 +101,10 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
                             textColor: const Color(0xFF1E293B),
                             onPressed: () {
                               SoundService.play1UpSound();
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Pantalla de Récords en desarrollo...'),
-                                  duration: Duration(seconds: 1),
-                                ),
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (_) => const RecordsScreen()),
                               );
                             },
                           ),
@@ -118,11 +120,10 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
                             textColor: Colors.white,
                             onPressed: () {
                               SoundService.playSettingsSound();
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Pantalla de Opciones en desarrollo...'),
-                                  duration: Duration(seconds: 1),
-                                ),
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (_) => const OptionsScreen()),
                               );
                             },
                           ),
@@ -219,7 +220,10 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
       child: Stack(
         children: [
           Positioned(
-            top: 0, left: 0, right: 0, bottom: 7,
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 7,
             child: Container(
               decoration: BoxDecoration(
                 color: const Color(0xFFFFCA28),
@@ -286,7 +290,10 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
       child: Stack(
         children: [
           Positioned(
-            top: 0, left: 0, right: 0, bottom: 6,
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 6,
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12),
               decoration: BoxDecoration(
@@ -298,7 +305,9 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
                   Container(
                     width: 42,
                     height: 42,
-                    padding: imagePath != null ? const EdgeInsets.all(3) : EdgeInsets.zero,
+                    padding: imagePath != null
+                        ? const EdgeInsets.all(3)
+                        : EdgeInsets.zero,
                     decoration: BoxDecoration(
                       color: badgeColor,
                       borderRadius: BorderRadius.circular(10),
